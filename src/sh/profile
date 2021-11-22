@@ -5,6 +5,8 @@ export NUMONIC_HOME="${NUMONIC_HOME:-"${NUMONIC_LOCAL}/numonic"}"
 export NUMONIC_SHARE="${NUMONIC_SHARE:-"${NUMONIC_LOCAL}/share"}"
 export NUMONIC_BIN="${NUMONIC_BIN:-"${NUMONIC_LOCAL}/bin"}"
 
+export MANPATH="${NUMONIC_HOME}/man:${MANPATH}"
+
 if [ -t 1 ]; then
 	# enable colors for various commands
 	export TERM=xterm-256color

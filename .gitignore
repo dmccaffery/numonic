@@ -4,6 +4,9 @@
 # vscode
 !.vscode/
 
+# github
+!.github/
+
 # configuration
 !.gitignore
 !.gitattributes
@@ -11,18 +14,12 @@
 !.taplo.toml
 !.gitkeep
 !.containerignore
-
-# semver management
 !.releaserc*
+!.shellcheckrc
 
-# node
+# node (semantic-release)
 node_modules/
-!.eslintrc.yaml
-!.eslintignore
 package-lock.json
-
-# github
-!.github/
 
 # log files
 *.logs
@@ -30,3 +27,6 @@ package-lock.json
 
 # windows crap
 Thumbs.db
+
+# documentation
+docs/site

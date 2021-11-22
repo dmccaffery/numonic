@@ -1,6 +1,6 @@
 #! /usr/bin/env sh
 
-set -ex
+set -e
 
 version=${1:-$(git describe --tags --abbrev=0 || printf '0.0.1-alpha')}
 default_author=$(git config user.name || printf 'Numonic Contributors')
@@ -8,7 +8,7 @@ default_date=$(date -u +'%B %e, %Y')
 
 repo_path=$(git rev-parse --show-toplevel)
 src_path="${repo_path}"/docs/content/commands
-man_path="${repo_path}"/src/local/share/man
+man_path="${repo_path}"/src/man
 pandoc_path="${repo_path}/.pandoc"
 
 if [ -d "${man_path}" ]; then

@@ -3,7 +3,7 @@
 set -e
 
 pandoc_path=".pandoc"
-man_path="src/local/share/man"
+man_path="src/man"
 
 if ! command -v pandoc 1>/dev/null 2>&1; then
 	printf 'docs-manpages: pandoc not found'
@@ -11,7 +11,7 @@ if ! command -v pandoc 1>/dev/null 2>&1; then
 fi
 
 if [ ! -d "${pandoc_path}" ]; then
-	printf 'docs-manpages: mgenerated docs are missing'
+	printf 'docs-manpages: generated docs are missing'
 	exit 1
 fi
 
@@ -34,6 +34,7 @@ find "${pandoc_path}" -type f | while read -r manpage; do
 
 	pandoc --standalone \
 		--from=markdown-smart --to=man \
+		--columns=120 \
 		--template=./hack/docs.tpl --output="${current_path}" \
 		"${manpage}"
 done

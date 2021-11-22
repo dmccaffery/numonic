@@ -1,5 +1,5 @@
 git+https://github.com/squidfunk/mkdocs-material-insiders.git
-git+https://github.com/jimporter/mike.git
+mike
+mkdocs-awesome-pages-plugin
 mkdocs-git-revision-date-localized-plugin
 mkdocs-minify-plugin
-plantuml-markdown

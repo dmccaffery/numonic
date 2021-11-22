@@ -1,17 +1,16 @@
 site_name: numonic
 site_url: https://numonic.sh
-docs_dir: !ENV [CHANNEL_DOCS_DIR, "docs"]
 repo_url: https://github.com/automotivemastermind/numonic
 repo_name: am/numonic
 edit_uri: edit/main/docs/content
 copyright: Copyright &copy; 2021. automotiveMastermind and contributors.
 use_directory_urls: true
-docs_dir: ./docs/content
-site_dir: ./docs/site
+docs_dir: content
+site_dir: site
 
 theme:
   name: material
-  custom_dir: docs/theme
+  custom_dir: theme
   favicon: img/favicon.ico
   features:
     - navigation.tabs
@@ -46,11 +45,6 @@ extra_javascript:
   - assets/tables.js
 
 markdown_extensions:
-  - plantuml_markdown:
-      server: http://www.plantuml.com/plantuml
-      base_dir: ./docs/content
-      format: svg
-      priority: 100
   - toc:
       slugify: !!python/name:pymdownx.slugs.uslugify
       permalink: true
@@ -58,6 +52,7 @@ markdown_extensions:
   - meta
   - smarty:
       smart_quotes: false
+      smart_dashes: false
   - pymdownx.betterem
   - attr_list
   - def_list
@@ -89,7 +84,7 @@ markdown_extensions:
   - pymdownx.mark
   - pymdownx.striphtml
   - pymdownx.snippets:
-      base_path: ./docs/content
+      base_path: content
   - pymdownx.keys:
       separator: "\uff0b"
   - pymdownx.details
