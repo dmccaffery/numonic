@@ -1,6 +1,6 @@
-ARG FROM_REPO=ubuntu
-ARG FROM_TAG=latest
-FROM ${FROM_REPO}:${FROM_TAG}
+ARG DISTRO=ubuntu
+ARG TAG=latest
+FROM ${DISTRO}:${TAG}
 
 ARG NUMONIC_SHELL=bash
 
@@ -16,10 +16,10 @@ USER numonic
 ENV NUMONIC_CONTAINER="true" \
     _CONTAINERS_USERNS_CONFIGURED=""
 
-RUN set -ex; \
+RUN set -e; \
     ./install.sh ${NUMONIC_SHELL}; \
     ./hack/clean.sh --force;
 
 WORKDIR /home/numonic
-COPY entrypoint.sh /home/numonic/.local/bin/entrypoint
+COPY containers/entrypoint.sh /home/numonic/.local/bin/entrypoint
 ENTRYPOINT [ "/home/numonic/.local/bin/entrypoint" ]

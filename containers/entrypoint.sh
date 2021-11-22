@@ -6,7 +6,7 @@ set -e
 SHELL=$(cat "${HOME}"/.local/numonic/.shell)
 
 # determine if there are not any args
-if [ "${1:-}" = "" ]; then
+if [ -z "${1:-}" ]; then
 
 	# run the shell
 	exec "${SHELL}" -l

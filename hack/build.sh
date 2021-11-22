@@ -109,6 +109,7 @@ __numonic_build()
 
 	# set up the args to the build command
 	set -- \
+		--file=./containers/Containerfile \
 		--platform="${platforms}" \
 		--label=org.opencontainers.image.name=numonic \
 		--label=org.opencontainers.image.revision="${GITHUB_SHA}" \
