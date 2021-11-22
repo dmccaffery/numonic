@@ -6,7 +6,6 @@ if [ -t 1 ]; then
 	export FORMAT_BOLD="$(tput bold)"		# SET BRIGHT/BOLD
 	export FORMAT_DIM="$(tput dim)"			# SET DIM/HALF-BRIGHT
 	export FORMAT_UNDERLINE="$(tput smul)"	# SET UNDERLINE
-	export FORMAT_NO_TTY='' 				# SET NO-TTY
 
 	export CLR_BLACK="$(tput setaf 0)"		# ANSI BLACK (GRAY)
 	export CLR_RED="$(tput setaf 1)"		# ANSI RED
@@ -34,7 +33,6 @@ else
 	export FORMAT_BOLD=''
 	export FORMAT_DIM=''
 	export FORMAT_UNDERLINE=''
-	export FORMAT_NO_TTY="\n"
 
 	export CLR_BLACK=''
 	export CLR_RED=''

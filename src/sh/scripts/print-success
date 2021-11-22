@@ -1,12 +1,13 @@
 #! //usr/bin/env sh
+# shellcheck disable=SC2059
 
 set -e
 
 __numonic_print_success()
 {
-	printf '%s' "${CLR_SUCCESS}"
+	printf "${CLR_SUCCESS}"
 	printf '%s\n' "$@"
-	printf '%s' "${FORMAT_NO_TTY}${CLR_SUCCESS}${FORMAT_CLEAR}"
+	printf "${CLR_SUCCESS}${FORMAT_CLEAR}"
 }
 
 __numonic_print_success "$@"

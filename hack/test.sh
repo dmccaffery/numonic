@@ -7,17 +7,6 @@ SHELL=${SHELL##*/}
 
 final=0
 
-__numonic_print_test() {
-	printf '%*.0s\n' 120 ""  | tr " " "%"
-	printf '%*.0s\n' 120 ""  | tr " " "%"
-	printf 'TEST: %s\n' "$*" | tr '[:lower:]' '[:upper:]'
-	printf '%*.0s\n' 120 ""  | tr " " "%"
-	printf '%*.0s\n' 120 ""  | tr " " "%"
-	printf '\n'
-}
-
-alias print-test='__numonic_print_test'
-
 if [ -z "${CI:-}" ]; then
 	test_home=$(mktemp -d)
 
@@ -39,8 +28,6 @@ fi
 		name=${test##*/}
 		name=${name%.test.sh*}
 		name="${shell}/${name}"
-
-		print-test "${name}"
 
 		temp=$(mktemp -d)
 

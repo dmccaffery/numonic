@@ -1,12 +1,13 @@
 #! /usr/bin/env sh
+# shellcheck disable=SC2059
 
 set -e
 
 __numonic_print_warn()
 {
-	printf '%s' "${CLR_WARN}"
+	printf "${CLR_WARN}"
 	printf '%s\n' "$@"
-	printf '%s' "${FORMAT_NO_TTY}${CLR_WARN}${FORMAT_CLEAR}"
+	printf "${CLR_WARN}${FORMAT_CLEAR}"
 }
 
 __numonic_print_warn "$@" 1>&2
