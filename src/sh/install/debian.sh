@@ -3,8 +3,14 @@
 set -e
 
 __numonic_install_debian() {
+	if [ -n "${NUMONIC_NO_DEPENDENCIES:-}" ]; then
+		print-warn "debian: skipping installation of dependencies..."
+		return 0
+	fi
+
 	sudo_cmd=$(command -v sudo || printf '')
-	packages="git gnupg jq"
+
+	packages="findutils git gnupg jq man-db unzip"
 
 	print-success "debian: updating software repositories..."
 	"${sudo_cmd}" apt update --yes
@@ -16,5 +22,6 @@ __numonic_install_debian() {
 	print-success "debian: removing unnecessary dependencies..."
 	"${sudo_cmd}" apt autoremove -y
 }
+
 
 __numonic_install_debian

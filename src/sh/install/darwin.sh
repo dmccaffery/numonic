@@ -2,28 +2,28 @@
 
 set -e
 
-__numonic_install_brew() {
+__numonic_install_darwin_brew() {
+	if [ -n "${NUMONIC_NO_DEPENDENCIES:-}" ]; then
+		print-warn "macOS: skipping installation of dependencies..."
+		return 0
+	fi
 
 	# determine if we are on x86
 	if [ "$(uname -m)" = "x86_64" ]; then
 
 		# install homebrew using defaults
-		__numonic_install_intel
+		__numonic_install_darwin_intel
 
 		# move on immediately
 		return 0
 	fi
 
 	 # install homebrew for apple silicon
-	__numonic_install_arm64
+	__numonic_install_darwin_arm64
 }
 
-__numonic_install_intel() {
-	print-success '' \
-		'##############################################################################' \
-		'INSTALLING HOMEBREW FOR INTEL' \
-		'##############################################################################' \
-	''
+__numonic_install_darwin_intel() {
+	print-success "macOS: installing homebrew for Intel (amd64)..."
 
 	HOMEBREW_PREFIX="/usr/local"
 	brew_cmd="${HOMEBREW_PREFIX}/bin/brew"
@@ -36,12 +36,8 @@ __numonic_install_intel() {
 	__numonic_install_darwin "/usr/local/bin/brew"
 }
 
-__numonic_install_arm64() {
-	print-success '' \
-		'##############################################################################' \
-		'INSTALLING HOMEBREW FOR APPLE SILICON (arm64e)' \
-		'##############################################################################' \
-	''
+__numonic_install_darwin_arm64() {
+	print-success "macOS: installing homebrew for Apple Silicon (arm64e)..."
 
 	HOMEBREW_PREFIX="/opt/homebrew"
 	brew_cmd="${HOMEBREW_PREFIX}/bin/brew"
@@ -55,11 +51,7 @@ __numonic_install_arm64() {
 }
 
 __numonic_install_darwin() {
-	print-success '' \
-		'##############################################################################' \
-		'INSTALLING HOMEBREW PACKAGES' \
-		'##############################################################################' \
-	''
+	print-success "macOS: installing homebrew packages..."
 
 	brews='git gpg pinentry-mac jq'
 	brew_cmd=${1:-"/usr/local/bin/brew"}
@@ -83,40 +75,10 @@ __numonic_install_darwin() {
 			${brew_cmd} install "${pkg}" || true
 		fi
 	done
-
-	GPG_CONFIG_DIR="$(gpgconf --list-dirs homedir 2>/dev/null || printf '')"
-
-	# test for gpg config
-	if [ ! -d "${GPG_CONFIG_DIR}" ]; then
-
-		# create the gpg config directory
-		mkdir -p "${GPG_CONFIG_DIR}"
-
-		# set the permissions
-		chmod u=rwx,go= "${GPG_CONFIG_DIR}"
-
-		# apply initial defaults
-		gpgconf --apply-defaults 1>/dev/null 2>/dev/null || true
-	fi
-
-	print-success "macOS: setting git credential helper to use the macOS keychain..."
-	git config --global credential.helper osxkeychain
-
-	print-success "macOS: installing starship..."
-	curl --fail \
-		--silent \
-		--show-error \
-		--location \
-		https://starship.rs/install.sh | bash -s -- --force --bin-dir="${NUMONIC_BIN}" 1>/dev/null
 }
 
-__numonic_install_fonts() {
-
-	print-success '' \
-		'##############################################################################' \
-		'INSTALLING NERD FONT (FIRA CODE)' \
-		'##############################################################################' \
-	''
+__numonic_install_darwin_fonts() {
+	print-success "macOS: installing/upgrading fira code font..."
 
 	# setup the font dir
 	font_dir="${HOME}/Library/Fonts/NerdFonts"
@@ -149,5 +111,5 @@ __numonic_install_fonts() {
 	rm -rf "${temp_dir}" 1>/dev/null 2>&1
 }
 
-__numonic_install_brew
-__numonic_install_fonts
+__numonic_install_darwin_brew
+__numonic_install_darwin_fonts

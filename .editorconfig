@@ -9,6 +9,9 @@ insert_final_newline = true
 [{src,template}/**]
 indent_style = tab
 
+[install-numonic]
+indent_style = tab
+
 [*.sh]
 indent_style = tab
 

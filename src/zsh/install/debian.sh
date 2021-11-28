@@ -3,18 +3,23 @@
 set -e
 
 __numonic_install_debian() {
-	SUDO=$(command -v sudo || printf '')
-	PACKAGES="zsh"
+	if [ -n "${NUMONIC_NO_DEPENDENCIES:-}" ]; then
+		print-warn "debian: skipping installation of dependencies..."
+		return 0
+	fi
+
+	sudo_cmd=$(command -v sudo || printf '')
+	packages="zsh"
 
 	print-success "debian: updating software repositories..."
-	"${SUDO}" apt update --yes
+	"${sudo_cmd}" apt update --yes
 
-	print-success "debian: installing ${PACKAGES}..."
+	print-success "debian: installing ${packages}..."
 	# shellcheck disable=SC2086
-	"${SUDO}" apt install --yes ${PACKAGES}
+	"${sudo_cmd}" apt install --yes ${packages}
 
 	print-success "debian: removing unnecessary dependencies..."
-	"${SUDO}" apt autoremove -y
+	"${sudo_cmd}" apt autoremove -y
 }
 
 __numonic_install_debian

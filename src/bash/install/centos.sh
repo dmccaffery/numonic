@@ -1,6 +1,13 @@
 #! /usr/bin/env sh
 
+set -e
+
 __numonic_install_centos() {
+	if [ -n "${NUMONIC_NO_DEPENDENCIES:-}" ]; then
+		printf "centos: skipping installation of dependencies..."
+		return 0
+	fi
+
 	sudo_cmd=$(command -v sudo || printf '')
 	yum_cmd=$(command -v dnf || command -v yum)
 

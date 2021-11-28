@@ -1,21 +1,19 @@
-#! /usr/bin/env sh
+#! /usr/bin/env zsh
 
 __numonic_source_os() {
 
-	UNAMES=$(print-unames)
+	for current in $(print-unames); do
+		uname_path="${NUMONIC_HOME}/zsh/scripts/${current}"
 
-	for current in ${UNAMES}; do
-		UNAME_PATH="${NUMONIC_HOME}/zsh/scripts/${current}"
-
-		if [ ! -d "${UNAME_PATH}" ]; then
+		if [ ! -d "${uname_path}" ]; then
 			continue
 		fi
 
-		export PATH="${UNAME_PATH}:${PATH}"
+		export PATH="${uname_path}:${PATH}"
 
-		if [ -d "${UNAME_PATH}/eval" ]; then
-			for EVAL_SCRIPT in "${UNAME_PATH}"/eval/*; do
-				. "${EVAL_SCRIPT}"
+		if [ -d "${uname_path}/eval" ]; then
+			for eval_script in "${uname_path}"/eval/*; do
+				. "${eval_script}"
 			done
 		fi
 	done

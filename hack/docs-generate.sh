@@ -79,19 +79,6 @@ find "${src_path}" -name '*.md' -type f | while read -r manpage; do
 
 	printf -- '---\n\n' >> "${intermediate_path}"
 	cat "${manpage}" >> "${intermediate_path}"
-
-	current_path="${man_path}/man${section}"
-
-	if [ ! -d "${current_path}" ]; then
-		mkdir -p "${current_path}"
-	fi
-
-	current_path="${current_path}/${name}.${section}"
-
-	if command -v pandoc 1>/dev/null 2>&1; then
-		pandoc --standalone \
-			--from=markdown-smart --to=man \
-			--template=./hack/docs.tpl --output="${current_path}" \
-			"${intermediate_path}"
-	fi
 done
+
+./hack/docs-manpages.sh || true

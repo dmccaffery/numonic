@@ -3,6 +3,11 @@
 set -e
 
 __numonic_install_debian() {
+	if [ -n "${NUMONIC_NO_DEPENDENCIES:-}" ]; then
+		printf "debian: skipping installation of dependencies..."
+		return 0
+	fi
+
 	sudo_cmd=$(command -v sudo || printf '')
 	packages='bash bash-completion'
 

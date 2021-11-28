@@ -4,40 +4,34 @@ set -e
 
 __numonic_use_shell() {
 
-	NUMONIC_SHELL=${NUMONIC_SHELL:-${1:-zsh}}
-	INSTALL_PATH="${NUMONIC_HOME}"/"${NUMONIC_SHELL}"/install
+	numonic_shell=${numonic_shell:-${1:-zsh}}
+	install_dir="${NUMONIC_HOME}"/"${numonic_shell}"/install
 
-	if [ -z "${NUMONIC_SHELL:-}" ]; then
+	if [ -z "${numonic_shell:-}" ]; then
 		print-fail "numonic: you must specify a shell to use, either sh, bash, or zsh."
 		return 1
 	fi
 
-	UNAMES=$(print-unames)
-
-	FOUND=
+	found=
 
 	# iterate over each uname
-	for UNAME in ${UNAMES}; do
+	for current in $(print-unames); do
 
 		# get the uname install path
-		UNAME_PATH="${INSTALL_PATH}"/"${UNAME}".sh
+		uname_path="${install_dir}"/"${current}".sh
 
 		# determine if an installer for the uname does not exist
-		if [ -f "${UNAME_PATH}" ]; then
-
+		if [ -f "${uname_path}" ]; then
 			# we found at least one installer
-			FOUND=1
+			found=1
 
 			# print success
-			print-success "numonic: installing prerequisites for ${NUMONIC_SHELL}: ${UNAME}"
-
-			# move on to the next uname
-			break
+			print-success "numonic: installing prerequisites for ${numonic_shell}: ${current}"
 		fi
 	done
 
 	# determine if we did not find any installer
-	if [ -z "${FOUND:-}" ]; then
+	if [ -z "${found:-}" ]; then
 
 		print-fail "numonic: shell cannot be installed on this platform."
 		print-warn "Please open an issue to request support for this distribution."
@@ -64,36 +58,46 @@ __numonic_use_shell() {
 	fi
 
 	# run the installer
-	. "${UNAME_PATH}"
+	. "${uname_path}"
 
-	# determine if the shell could be found on the path
-	if ! command -v "${NUMONIC_SHELL}" 1>/dev/null 2>&1; then
-		print-fail "numonic: could not find ${NUMONIC_SHELL} on the path."
-		print-warn 'Please open an issue to request support for this distribution.'
+	if command -v /opt/homebrew/bin/"${numonic_shell}" 1>/dev/null 2>&1; then
+		numonic_shell_path=/opt/homebrew/bin/"${numonic_shell}"
+	elif command -v /usr/local/bin/"${numonic_shell}" 1>/dev/null 2>&1; then
+		numonic_shell_path=/usr/local/bin/"${numonic_shell}"
+	elif command -v /home/linuxbrew/.linuxbrew/bin/"${numonic_shell}" 1>/dev/null 2>&1; then
+		numonic_shell_path=/home/linuxbrew/.linuxbrew/bin/"${numonic_shell}"
+	elif command -v "${numonic_shell}" 1>/dev/null 2>&1; then
+		numonic_shell_path=$(command -v "${numonic_shell}")
+	else
+		print-fail "numonic: shell cannot be installed on this platform."
+		print-warn "Please open an issue to request support for this distribution."
 		return 1
 	fi
 
-	# get the prompt shell path
-	NUMONIC_SHELL_PATH=$(command -v "${NUMONIC_SHELL}")
-
 	# determine if the shell path is not already defined in /etc/shells
-	if ! grep "${NUMONIC_SHELL_PATH}" /etc/shells 1>/dev/null 2>&1; then
+	if ! grep "${numonic_shell_path}" /etc/shells 1>/dev/null 2>&1; then
+
+		if [ -n "${NUMONIC_NO_DEPENDENCIES:-}" ]; then
+			print-fail '' \
+				"numonic: shell ${numonic_shell_path} not enabled for user shells and --no-dependencies was set" \
+				"please add ${numonic_shell_path} to /etc/shells and try again" \
+			''
+		fi
+
+		sudo_cmd=$(command -v sudo || printf '')
 
 		# add the shell path
-		print-success "numonic: adding updated ${NUMONIC_SHELL} to shells..."
-		sudo sh -c "printf '%s\n' \"${NUMONIC_SHELL_PATH}\" >> /etc/shells"
+		print-success "numonic: adding updated ${numonic_shell} to shells..."
+		${sudo_cmd} sh -c "printf '%s\n' \"${numonic_shell_path}\" >> /etc/shells"
 	fi
 
-	if [ "${SHELL}" != "${NUMONIC_SHELL_PATH}" ]; then
-		print-success "setting ${NUMONIC_SHELL} to default shell for user..."
-		sudo chsh -s "${NUMONIC_SHELL_PATH}" "$(whoami)"
-
-		# set the default shell for the current session
-		export SHELL="${NUMONIC_SHELL_PATH}"
+	if [ "${SHELL}" != "${numonic_shell_path}" ]; then
+		print-success "numonic: setting ${numonic_shell_path} to default shell for user..."
+		chsh -s "${numonic_shell_path}"
 	fi
 
 	# set the shell in home
-	printf '%s' "${NUMONIC_SHELL_PATH}" > "${HOME}"/.local/numonic/.shell
+	printf '%s' "${numonic_shell_path}" > "${HOME}"/.local/numonic/.shell
 
 	# shellcheck disable=SC2016
 	print-success '' \
@@ -107,7 +111,7 @@ __numonic_use_shell() {
 		'' \
 		'PLEASE RUN THE FOLLOWING TO START USING THE NEW SHELL:' \
 		'' \
-		"exec ${SHELL} -l" \
+		"exec ${numonic_shell_path} -l" \
 		'' \
 		'##############################################################################' \
 		'##############################################################################' \

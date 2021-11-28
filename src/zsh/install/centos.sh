@@ -1,13 +1,20 @@
 #! /usr/bin/env sh
 
-__numonic_install_centos() {
-	SUDO=$(command -v sudo || printf '')
-	YUM=$(command -v dnf || command -v yum)
-	PACKAGES='zsh'
+set -e
 
-	print-success "centos: installing ${PACKAGES}..."
+__numonic_install_centos() {
+	if [ -n "${NUMONIC_NO_DEPENDENCIES:-}" ]; then
+		print-warn "centos: skipping installation of dependencies..."
+		return 0
+	fi
+
+	sudo_cmd=$(command -v sudo || printf '')
+	yum_cmd=$(command -v dnf || command -v yum)
+	packages='zsh'
+
+	print-success "centos: installing ${packages}..."
 	# shellcheck disable=SC2086
-	"${SUDO}" "${YUM}" install -y ${PACKAGES}
+	"${sudo_cmd}" "${yum_cmd}" install -y ${packages}
 }
 
 __numonic_install_centos

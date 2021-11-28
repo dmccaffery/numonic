@@ -3,6 +3,11 @@
 set -e
 
 __numonic_install_fedora() {
+	if [ -n "${NUMONIC_NO_DEPENDENCIES:-}" ]; then
+		printf "fedora: skipping installation of dependencies..."
+		return 0
+	fi
+
 	sudo_cmd=$(command -v sudo || printf '')
 	yum_cmd=$(command -v dnf || command -v yum)
 	packages='libxcrypt-compat'

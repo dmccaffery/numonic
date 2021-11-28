@@ -1,7 +1,9 @@
 {
   "search.exclude": {
     "**/backup": true,
-    "**/node_modules/**": true
+    "**/node_modules/**": true,
+    "CHANGELOG.md": true,
+    "src/man/**": true
   },
   "files.exclude": {
     "**/.git": true,
@@ -13,22 +15,32 @@
   "editor.formatOnSave": true,
   "files.trimTrailingWhitespace": true,
   "cSpell.words": [
-    "dnvm",
+    "aarch",
+    "automotivemastermind",
+    "autosquash",
+    "autostash",
+    "cgroupfs",
+    "checkov",
+    "containerd",
+    "distro",
+    "findutils",
     "gcloud",
     "keychain",
+    "linuxmint",
     "macOS",
-    "minikube",
-    "repos",
-    "symlink",
-    "toolchain",
-    "xcode",
-    "xplat"
+    "mkdir",
+    "nerdctl",
+    "numonic",
+    "podman",
+    "runtimes",
+    "signoff",
+    "skopeo",
+    "sshfs",
+    "tflint",
+    "tfsec",
+    "unames",
+    "userenv"
   ],
   "evenBetterToml.taploConfig": ".taplo.toml",
-  "shellcheck.enableQuickFix": true,
-  "shellcheck.exclude": [
-    "1071",
-    "1090",
-    "1091"
-  ],
+  "shellcheck.enableQuickFix": true
 }

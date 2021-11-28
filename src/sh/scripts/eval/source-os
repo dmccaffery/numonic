@@ -2,21 +2,18 @@
 
 __numonic_source_os() {
 
-	UNAMES=$(print-unames)
-	UNAMES=$(reverse "${UNAMES}")
+	for current in $(reverse "$(print-unames)"); do
+		uname_path="${NUMONIC_HOME}/sh/scripts/${current}"
 
-	for current in ${UNAMES}; do
-		UNAME_PATH="${NUMONIC_HOME}/sh/scripts/${current}"
-
-		if [ ! -d "${UNAME_PATH}" ]; then
+		if [ ! -d "${uname_path}" ]; then
 			continue
 		fi
 
 		export NUMONIC_OS="${current}"
-		export PATH="${UNAME_PATH}:${PATH}"
+		export PATH="${uname_path}:${PATH}"
 
-		if [ -d "${UNAME_PATH}/eval" ]; then
-			for eval_script in "${UNAME_PATH}"/eval/*; do
+		if [ -d "${uname_path}/eval" ]; then
+			for eval_script in "${uname_path}"/eval/*; do
 
 				if [ ! -f "${eval_script}" ]; then
 					break

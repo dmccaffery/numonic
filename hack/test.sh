@@ -46,7 +46,6 @@ fi
 		else
 			print-success "TEST: ${name} PASSED"
 		fi
-
 		rm -rf "${temp}"
 	done
 

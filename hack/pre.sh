@@ -30,12 +30,9 @@ if command -v apt 1>/dev/null 2>&1; then
 	apt update --yes
 	apt install --no-install-recommends -y \
 		curl \
-		findutils \
 		libvshadow-utils \
-		man-db \
 		python3 \
-		sudo \
-		unzip
+		sudo
 fi
 
 yum=$(command -v dnf || command -v yum || printf '')
@@ -46,10 +43,7 @@ if [ -n "${yum}" ]; then
 		curl \
 		sudo \
 		shadow-utils \
-		findutils \
-		man-db \
 		python3 \
-		unzip \
 		util-linux-user
 fi
 

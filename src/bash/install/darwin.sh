@@ -1,6 +1,13 @@
 #! /usr/bin/env sh
 
+set -e
+
 __numonic_install_darwin() {
+	if [ -n "${NUMONIC_NO_DEPENDENCIES:-}" ]; then
+		print-warn "macOS: skipping installation of dependencies..."
+		return 0
+	fi
+
 	brews='bash bash-completion@2'
 
 	for pkg in ${brews}; do

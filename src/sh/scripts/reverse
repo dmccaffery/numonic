@@ -10,7 +10,8 @@ __numonic_reverse() {
 		reversed="${value} ${reversed}"
 	done
 
-	printf '%s' "${reversed%*' '}"
+	# shellcheck disable=SC2086
+	printf '%s\n' ${reversed%*' '}
 }
 
 __numonic_reverse "$@"

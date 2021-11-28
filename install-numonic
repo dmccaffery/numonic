@@ -1,0 +1,274 @@
+#! /usr/bin/env sh
+
+set -e
+
+install_script_dir="${2:-$(cd -- "$(dirname -- "$0")" && pwd -P)}"
+
+export NUMONIC_LOCAL="${HOME}"/.local
+export NUMONIC_HOME="${NUMONIC_LOCAL}"/numonic
+export NUMONIC_SHARE="${NUMONIC_LOCAL}"/share
+export NUMONIC_BIN="${NUMONIC_LOCAL}"/bin
+
+# source the colors
+. "${install_script_dir}"/src/sh/scripts/eval/set-colors
+export PATH="${install_script_dir}/src/sh/scripts:${PATH}"
+
+__numonic_install() {
+	debug=
+	quiet=
+	shell=
+
+	while :; do
+		case $1 in
+			-d|--debug)
+				debug=1
+				;;
+			-h|--help)
+				MANPATH="${install_script_dir}/src/man" man install-numonic
+				return 0
+				;;
+			-nd|--no-deps|--no-dependencies)
+				export NUMONIC_NO_DEPENDENCIES=1
+				;;
+			-q|--quiet)
+				quiet=1
+				;;
+			-s|--shell)
+				shell="${2}"
+				;;
+			--shell=*)
+				shell="${1#*=}"
+				;;
+			*?)
+				if [ -z "${shell}" ]; then
+					shell="${1}"
+					continue
+				fi
+
+				print-fail "numonic: too many arguments, argument: ${1} is unexpected"
+				MANPATH="${install_script_dir}/src/man" man install-numonic | cat 1>&2
+				return 1
+				;;
+			*)
+				break;
+		esac
+		shift
+	done
+
+	(
+		if [ -n "${quiet:-}" ]; then
+			exec 1>/dev/null
+		fi
+
+		if [ -n "${debug:-}" ]; then
+			set -x
+		fi
+
+		# get the shell name
+		shell="${shell:-${SHELL##*/}}"
+
+		# lowercase the requested shell
+		shell=$(printf '%s' "${shell}" | tr '[:upper:]' '[:lower:]')
+
+		# install prerequisites
+		__numonic_install_backup
+		__numonic_install_deps
+		__numonic_install_copy
+
+		sha=$(cat "${install_script_dir}"/VERSION)
+		sha_path="${HOME}"/.local/numonic/.sha
+
+		printf '%s\n' "${sha}" > "${sha_path}"
+
+		print-success '' \
+			'##############################################################################' \
+			"INSTALLING SHELL (${shell})" \
+			'##############################################################################' \
+		''
+
+		# use the correct shell
+		use-shell "${shell}"
+
+		# open the changelog url
+		open-url --quiet "https://github.com/automotivemastermind/numonic/blob/${sha}/CHANGELOG.md"
+	)
+}
+
+__numonic_install_copy() {
+	print-success '' \
+		'##############################################################################' \
+		'INSTALLING NUMONIC' \
+		'##############################################################################' \
+	''
+
+	# find all non-user scripts and copy them
+	find "${install_script_dir}"/src -mindepth 1 -maxdepth 1 -type d \
+		-not -name 'local' \
+		-exec cp -Rf {} "${NUMONIC_HOME}" \;
+
+	local_dir="${install_script_dir}"/src/local
+
+	# find all of the user initialization files
+	find "${local_dir}" -type f | while read -r item; do
+
+		# get the relative path of the item within local dir
+		item_rel=${item##*"${local_dir}"}
+
+		# get the item to path
+		item_to="${NUMONIC_LOCAL}/${item_rel}"
+
+		# get the absolute final path of the item
+		item_dir=$(dirname "${item_to}")
+
+		# get the item name
+		item_name=$(basename "${item}")
+
+		# determine if the item path does not exist
+		if [ ! -d "${item_dir}" ]; then
+
+			# create the user path
+			mkdir -p "${item_dir}"
+		fi
+
+		# determine if the item is the keeper
+		if [ "${item_name}" = ".gitkeep" ]; then
+
+			# move on immediately
+			continue
+		fi
+
+		# determine if the item does not exist
+		if [ ! -f "${item_to}" ]; then
+
+			# copy the user item
+			cp "${item}" "${item_to}"
+		fi
+	done
+}
+
+__numonic_install_deps() {
+	print-success '' \
+		'##############################################################################' \
+		'INSTALLING DEPENDENCIES' \
+		'##############################################################################' \
+	''
+
+	# determine if the numonic directories exist and create them if not
+	if [ ! -d "${NUMONIC_HOME}" ]; then
+		print-success "numonic: installing at: ${NUMONIC_HOME}"
+		mkdir -p "${NUMONIC_HOME}"
+	fi
+
+	if [ ! -d "${NUMONIC_BIN}" ]; then
+		print-success "numonic: creating bin at: ${NUMONIC_BIN}"
+		mkdir -p "${NUMONIC_BIN}"
+	fi
+
+	if [ ! -d "${NUMONIC_SHARE}" ]; then
+		print-success "numonic: creating share at: ${NUMONIC_SHARE}"
+		mkdir -p "${NUMONIC_SHARE}"
+	fi
+
+	if [ -n "${NUMONIC_NO_DEPENDENCIES:-}" ]; then
+		for cmd in curl find grep jq man unzip; do
+			if ! command -v ${cmd} 1>/dev/null 2>&1; then
+				print-fail "numonic: missing required dependency for command: ${cmd}"
+				err=1
+			fi
+		done
+
+		if [ -n "${err:-}" ]; then
+			print-fail '' \
+				'numonic: required dependencies were missing with --no-dependencies flag set' \
+				'please install the missing dependencies or allow numonic to install them by not setting this flag' \
+			''
+
+			return 1
+		fi
+
+		return 0
+	fi
+
+	# determine if sudo is available
+	if command -v sudo 1>/dev/null 2>&1; then
+		print-warn 'numonic: establishing sudo (you may be prompted for credentials)...'
+		sudo printf '%s\n' ''
+		print-success "numonic: sudo enabled"
+	fi
+
+	# iterate over each uname
+	for current in unames=$(print-unames); do
+
+		# find the install path for the uname
+		uname_dir="${install_script_dir}"/src/sh/install/"${current}".sh
+
+		# determine if the installer for the uname does not exist
+		if [ ! -f "${uname_dir}" ]; then
+			# test the next uname
+			continue
+		fi
+
+		# detect or install the prerequisites
+		print-success "numonic: install platform prerequisites for: ${current}"
+		. "${uname_dir}"
+	done
+}
+
+__numonic_install_backup() {
+	print-success '' \
+		'##############################################################################' \
+		'BACKING UP SHELL ENVIRONMENT' \
+		'##############################################################################' \
+	''
+
+	# setup the backup path
+	backup_dir="${NUMONIC_LOCAL}"/backup/numonic/initial
+
+	# determine if the initial backup path exists
+	if [ -d "${backup_dir:-}" ]; then
+		# get the current timestamp as a backup path
+		now_timestamp=$(date +'%Y-%M-%d-%H%M%S')
+		backup_dir="${NUMONIC_LOCAL}"/backup/numonic/"${now_timestamp}"
+	fi
+
+	# script the backup path
+	print-success "numonic: creating backup path: ${backup_dir}"
+	mkdir -p "${backup_dir}" 1>/dev/null 2>&1 || true
+
+	# print out the shell
+	printf '%s' "${SHELL}" > "${backup_dir}"/.shell
+
+	# determine if numonic already exists
+	if [ -d "${NUMONIC_HOME}" ]; then
+		# create the numonic local directory
+		mkdir -p "${backup_dir}/.local/numonic" 1>/dev/null 2>&1 || true
+
+		# find all non-user and backup paths and back them up
+		print-success "numonic: creating backup from: ${NUMONIC_HOME}"
+		find "${NUMONIC_HOME}" -mindepth 1 -maxdepth 1 -type d \
+			-exec mv {} "${backup_dir}/.local/numonic" \;
+	fi
+
+	# backup the templates
+	for template in "${install_script_dir}"/template/*; do
+		template_name=$(basename "${template}")
+		template_path="${HOME}/.${template_name}"
+
+		if [ -f "${template_path}" ]; then
+			print-success "numonic: backing up ${template_name}"
+			cp -pRP "${template_path}" "${backup_dir}/.${template_name}"
+
+			if [ "${template_name}" = "pam_environment" ]; then
+				continue
+			fi
+		fi
+
+		cp "${template}" "${template_path}"
+	done
+}
+
+# print a warning
+trap 'print-fail "numonic: terminating install..."; exit 1;' INT
+
+# invoke the installer
+__numonic_install "$@"
