@@ -7,7 +7,6 @@ export NUMONIC_SHELL="bash"
 shopt -s checkwinsize	# check window size on script exit
 shopt -s cdable_vars	# enable change directory to a variable value
 shopt -s extglob		# enable extended glob patterns
-shopt -s globstar		# enable glob ** expansion
 shopt -s nullglob		# enable nullglob
 
 export HISTCONTROL=ignoreboth

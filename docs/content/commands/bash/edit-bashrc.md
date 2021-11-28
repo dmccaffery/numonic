@@ -18,7 +18,9 @@ current PATH and will set this to the default editor if not otherwise set in the
 
 The user-specific bash startup script is located at:
 
-\$HOME/.local/share/bashrc
+```sh
+$HOME/.local/share/bashrc
+```
 
 If the file does not exist, it will be created with the correct shebang for bash.
 
@@ -49,5 +51,5 @@ open the default editor to the user-specific bash startup script while printing 
 
 # SEE ALSO
 
-[**userenv**(1)](https://automotivemastermind.github.io/numonic/userenv/),
+[**userenv**(1)](../userenv/index.md),
 [**bash**(1)](https://man7.org/linux/man-pages/man1/bash.1.html), **editor**(1)

@@ -7,7 +7,7 @@ __numonic_edit_bashrc() {
 				debug=1
 				;;
 			-h|--help)
-				man git edit-bashrc
+				man edit-bashrc
 				return 0
 				;;
 			*?)
