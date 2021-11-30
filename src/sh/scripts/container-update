@@ -3,11 +3,10 @@
 set -e
 
 __numonic_container_update() {
+	runtimes=
+
 	while :; do
 		case $1 in
-			-q|--quiet)
-				quiet=1
-				;;
 			-d|--debug)
 				debug=1
 				;;
@@ -15,10 +14,22 @@ __numonic_container_update() {
 				man container-update
 				return 0
 				;;
+			-q|--quiet)
+				quiet=1
+				;;
+			-r|--runtime)
+				runtimes="${runtimes} ${2}"
+				shift
+				;;
+			--runtime=*)
+				runtimes="${runtimes} ${1#*=}"
+				;;
+			--)
+				shift
+				break
+				;;
 			*?)
-				print-fail "container-update: unknown argument ${1}"
-				man container-update | cat 1>&2
-				return 1
+				runtimes="${runtimes} ${1}"
 				;;
 			*)
 				break;
@@ -26,46 +37,32 @@ __numonic_container_update() {
 		shift
 	done
 
-	if command -v podman 1>/dev/null 2>&1; then
-		(
-			if [ -n "${debug:-}" ]; then
-				set -x
-			fi
-
-			if [ -n "${quiet:-}" ]; then
-				exec 1>/dev/null
-			fi
-
-			print-warn 'container-update: updating images in podman...' 2>&1
-
-			podman image ls --filter dangling=false \
-				--format "{{.Repository}}:{{.Tag}}" | xargs -L1 podman pull 2>/dev/null
-		) || true
-
-		found=1
+	if [ -z "${runtimes:-}" ]; then
+		runtimes="docker nerdctl podman"
 	fi
 
-	if command -v docker 1>/dev/null 2>&1; then
-		(
-			if [ -n "${debug:-}" ]; then
-				set -x
-			fi
+	for runtime in ${runtimes}; do
+		if command -v "${runtime}" 1>/dev/null 2>&1; then
+			(
+				if [ -n "${quiet:-}" ]; then
+					exec 1>/dev/null
+				fi
 
-			if [ -n "${quiet:-}" ]; then
-				exec 1>/dev/null
-			fi
+				if [ -n "${debug:-}" ]; then
+					set -x
+				fi
 
-			print-warn 'container-update: updating images in docker...' 2>&1
+				print-warn "container-update: updating images in ${runtime}..." 2>&1
+				"${runtime}" "$@" image ls \
+					--format "{{.Repository}}:{{.Tag}}" | xargs -L1 "${runtime}" pull 2>/dev/null
+			) || true
 
-			docker image ls --filter dangling=false \
-				--format "{{.Repository}}:{{.Tag}}" | xargs -L1 docker pull 2>/dev/null
-		) || true
-
-		found=1
-	fi
+			found=1
+		fi
+	done
 
 	if [ -z "${found:-}" ]; then
-		print-fail 'container-update: neither podman nor docker were available on the path.'
+		print-fail 'container-update: no container runtimes were available on the path.'
 		man container-update | cat 1>&2
 		return 1
 	fi

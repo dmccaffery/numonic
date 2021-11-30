@@ -1,21 +1,32 @@
-.TH "CONTAINER-UPDATE" "1" "November 18, 2021" "Numonic v1.0.0" "Numonic Manual"
+.TH "CONTAINER-UPDATE" "1" "November 30, 2021" "Numonic v1.0.0" "Numonic Manual"
 .nh \" Turn off hyphenation by default.
 .SH NAME
 .PP
-container-update - pulls the latest image layer or manifest for each tag that is locally cached within both podman and
-docker
+container-update - pulls the latest image layer or manifest for each tag that is locally cached within docker, nerdctl,
+and podman
 .SH SYNOPSIS
 .PP
-\f[B]container-update\f[R] [\f[B]-d\f[R] | \f[B]--debug\f[R]] [\f[B]-h\f[R] | \f[B]--help\f[R]] [\f[B]-q\f[R] |
-\f[B]--quiet\f[R]]
+\f[B]container-update\f[R] [<\f[I]runtime\f[R]> ...]
+[\f[B]-d\f[R] | \f[B]--debug\f[R]] [\f[B]-h\f[R] | \f[B]--help\f[R]] [\f[B]-q\f[R] | \f[B]--quiet\f[R]] [\f[B]--\f[R]
+<args>]
+.PP
+\f[B]container-update\f[R] [\f[B]-r\f[R] <*runtime> ...]
+[\f[B]-d\f[R] | \f[B]--debug\f[R]] [\f[B]-h\f[R] | \f[B]--help\f[R]] [\f[B]-q\f[R] | \f[B]--quiet\f[R]] [\f[B]--\f[R]
+<args>]
+.PP
+\f[B]container-update\f[R] [\f[B]--runtime=\f[R]<\f[I]runtime\f[R]> ...]
+[\f[B]-d\f[R] | \f[B]--debug\f[R]] [\f[B]-h\f[R] | \f[B]--help\f[R]] [\f[B]-q\f[R] | \f[B]--quiet\f[R]] [\f[B]--\f[R]
+<args>]
 .SH DESCRIPTION
 .PP
-This command pulls the latest image layer or manifest for each tag that is locally cached within both podman and docker.
+This command pulls the latest image layer or manifest for each tag that is locally cached within docker, nerdctl, and
+podman.
 At least one of these must be available on the \f[B]PATH\f[R] or the command will fail.
-If both are on the \f[B]PATH\f[R], then both will be updated.
+If more than one are on the \f[B]PATH\f[R], then each will be updated.
 This is primarily useful for images are up to date locally when referencing vanity tags.
 .PP
-The command essentially performs the following:
+The command essentially performs the following where <command> is \f[C]docker\f[R], \f[C]nerdctl\f[R], or
+\f[C]podman\f[R]:
 .PP
 <command> images --filter dangling=false --format \[rs] \[aq]{{.Repository}}:{{Tag}} | xargs -L1 <command> pull
 .SH OPTIONS
@@ -29,18 +40,39 @@ print this help information
 .SS -q, --quiet
 .PP
 suppress any output to stdout (any errors will still be printed)
+.SS ARGUMENTS
+.SS <runtime>, -r <runtime>, --runtime=<runtime>
+.PP
+the name of the runtime for which to update images multiple runtimes may be specified the allowed values are: docker,
+nerdctl, or podman
+.SS <args>
+.PP
+additional arguments to pass to the underlying runtime cli
+.PP
+These arguments must be specified after a \f[B]--\f[R] separator at the end of the command.
 .SH EXAMPLES
 .SS container-update
 .PP
-pull the latest image layer or manifest for each tag that is locally cached within both podman and docker
+pull the latest image layer or manifest for each tag that is locally cached within docker, nerdctl, and podman
 .SS container-update -d
 .SS container-update --debug
 .PP
-pull the latest image layer or manifest for each tag that is locally cached within both podman and docker while printing
-the commands as they are executed
+pull the latest image layer or manifest for each tag that is locally cached within docker, nerdctl, and podman while
+printing the commands as they are executed
+.SS container-update docker
+.SS container-update -r docker
+.SS container-update --runtime=docker
+.PP
+pull the latest image layer or manifest for each tag that is locally cached within docker using the current context
+.SS container-update docker -- --context=docker-root
+.SS container-update -r docker -- --context=docker-root
+.SS container-update --runtime=docker -- --context=docker-root
+.PP
+pull the latest image layer or manifest for each tag that is locally cached within docker using the
+\f[C]docker-root\f[R] context (this context is an example context)
 .SH SEE ALSO
 .PP
 \f[B]podman-images\f[R](1) (https://docs.podman.io/en/latest/markdown/podman-images.1.html),
 \f[B]podman-pull\f[R](1) (https://docs.podman.io/en/latest/markdown/podman-pull.1.html)
 .SH AUTHORS
-Deavon M. McCaffery
+Not Committed Yet
