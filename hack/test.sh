@@ -1,39 +1,108 @@
 #! /usr/bin/env sh
 
-set +e
+set -e
 
-SHELL=${1:-$(cat "${HOME}"/.local/numonic/.shell)}
-SHELL=${SHELL##*/}
+shells=
+tests=
 
-final=0
+while :; do
+	case $1 in
+		-s|--shell)
+			shells="${shells} ${2}"
+			;;
+		--shell=*)
+			shells="${shells} ${1#*=}"
+			;;
+		-t|--test)
+			tests="${tests} ${2}"
+			shift
+			;;
+		--test=*)
+			tests="${tests} ${1#*=}"
+			;;
+		?*)
+			printf "\test: unknown argument: %s\n" "${1}"
+			exit 1
+			;;
+		*)
+			break
+			;;
+	esac
+	shift
+done
+
+if [ -z "${shells:-}" ]; then
+	shells="'*'"
+fi
+
+if [ -z "${tests:-}" ]; then
+	tests="'*'"
+fi
+
+shells=${shells#*' ':-"'*'"}
+tests=${tests#*' ':-"'*'"}
 
 if [ -z "${CI:-}" ]; then
 	test_home=$(mktemp -d)
 
 	export NUMONIC_LOCAL="${test_home}"/local
 	export NUMONIC_HOME="${PWD}"/src
-
-	print-success '' \
-		'test: setting up temporary environment...' \
-		"NUMONIC_LOCAL : ${NUMONIC_LOCAL}" \
-		"NUMONIC_HOME  : ${NUMONIC_HOME}" \
-	''
 fi
 
+print-success '' \
+	'test: setting up environment...' \
+	"NUMONIC_LOCAL : ${NUMONIC_LOCAL}" \
+	"NUMONIC_HOME  : ${NUMONIC_HOME}" \
+	"shells        : ${shells}" \
+	"tests         : ${tests}" \
+''
+
+set +e
+final=0
+
 (
-	for test in "${PWD}"/test/*.test.sh; do
-		shell=${test%/*}
+	for shell in ${shells}; do
+		if [ "${shell}" = "'*'" ]; then
+			shell="*"
+		fi
+
+		for test in ${tests}; do
+			if [ "${test}" = "'*'" ]; then
+				test="*"
+			fi
+
+			for current in "${PWD}"/test/${shell}/${test}.test.sh; do
+				echo "test: ${current}"
+			done
+		done
+	done
+
+	exit 0
+
+	for current in "${PWD}"/test/${filter}.test.sh; do
+		if [ ! -f "${current}" ]; then
+			continue
+		fi
+
+		shell=${current%/*}
 		shell=${shell##*/}
 
-		name=${test##*/}
+		name=${current##*/}
 		name=${name%.test.sh*}
 		name="${shell}/${name}"
+
+		if ! command -v "${shell}" 1>/dev/null 2>&1; then
+			print-warn "test: skipping ${name} tests as the ${shell} shell is not available..."
+			continue
+		fi
+
+		print-success "TEST: ${name} STARTING"
 
 		temp=$(mktemp -d)
 
 		(
 			cd "${temp}" || exit 1
-			TERM=dumb "${SHELL}" -lc "${test}" 1>stdout 2>stderr
+			TERM=dumb "${shell}" -lc "${current}" 1>stdout 2>stderr
 		)
 
 		exit_code=$?

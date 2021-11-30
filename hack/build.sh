@@ -10,71 +10,71 @@ __numonic_build()
 	runtime=
 
 	while :; do
-			case $1 in
-				-d|--debug)
-					debug=1
-					;;
-				-dr|--dry-run)
-					dry_run=1
-					;;
-				-i|--image)
-					images="${images} ${2}"
-					shift
-					;;
-				--image=*)
-					images="${images} ${1#*=}"
-					;;
-				-o|--org)
-					GITHUB_ORG="${2}"
-					;;
-				--org=*)
-					GITHUB_ORG="${1#*=}"
-					;;
-				-p|--platform)
-					platforms="${platforms},${2}"
-					shift
-					;;
-				--platform=*)
-					platforms="${platforms},${1#*=}"
-					;;
-				-r|--ref)
-					GITHUB_REF="${2}"
-					shift
-					;;
-				-cr|--runtime)
-					runtime="${2}"
-					shift
-					;;
-				--runtime=*)
-					runtime="${1#*=}"
-					;;
-				--ref=*)
-					GITHUB_REF="${1#*=}"
-					;;
-				-sha|--sha)
-					GITHUB_SHA="${2}"
-					shift
-					;;
-				--sha=*)
-					GITHUB_SHA="${1#*=}"
-					;;
-				-s|--shell)
-					shells="${shells} ${2}"
-					shift
-					;;
-				--shell=*)
-					shells="${shells} ${1#*=}"
-					;;
-				?*)
-					printf "\nbuild: unknown argument: %s\n" "${1}"
-					exit 1
-					;;
-				*)
-					break
-					;;
-			esac
-			shift
-		done
+		case $1 in
+			-d|--debug)
+				debug=1
+				;;
+			-dr|--dry-run)
+				dry_run=1
+				;;
+			-i|--image)
+				images="${images} ${2}"
+				shift
+				;;
+			--image=*)
+				images="${images} ${1#*=}"
+				;;
+			-o|--org)
+				GITHUB_ORG="${2}"
+				;;
+			--org=*)
+				GITHUB_ORG="${1#*=}"
+				;;
+			-p|--platform)
+				platforms="${platforms},${2}"
+				shift
+				;;
+			--platform=*)
+				platforms="${platforms},${1#*=}"
+				;;
+			-r|--ref)
+				GITHUB_REF="${2}"
+				shift
+				;;
+			-cr|--runtime)
+				runtime="${2}"
+				shift
+				;;
+			--runtime=*)
+				runtime="${1#*=}"
+				;;
+			--ref=*)
+				GITHUB_REF="${1#*=}"
+				;;
+			-sha|--sha)
+				GITHUB_SHA="${2}"
+				shift
+				;;
+			--sha=*)
+				GITHUB_SHA="${1#*=}"
+				;;
+			-s|--shell)
+				shells="${shells} ${2}"
+				shift
+				;;
+			--shell=*)
+				shells="${shells} ${1#*=}"
+				;;
+			?*)
+				printf "\nbuild: unknown argument: %s\n" "${1}"
+				exit 1
+				;;
+			*)
+				break
+				;;
+		esac
+		shift
+	done
 
 	if [ -z "${platforms:-}" ]; then
 		platforms="linux/amd64,linux/arm64"
