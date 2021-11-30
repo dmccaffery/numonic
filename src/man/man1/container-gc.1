@@ -1,21 +1,34 @@
-.TH "CONTAINER-GC" "1" "November 18, 2021" "Numonic v1.0.0" "Numonic Manual"
+.TH "CONTAINER-GC" "1" "November 30, 2021" "Numonic v1.0.0" "Numonic Manual"
 .nh \" Turn off hyphenation by default.
 .SH NAME
 .PP
-container-gc - garbage collects all stopped containers and dangling volumes and images for both podman and docker
+container-gc - garbage collects all, containers, volumes, and images that are not currently in use within docker,
+nerdctl, and podman
 .SH SYNOPSIS
 .PP
-\f[B]container-gc\f[R] [\f[B]-d\f[R] | \f[B]--debug\f[R]] [\f[B]-h\f[R] | \f[B]--help\f[R]] [\f[B]-q\f[R] |
-\f[B]--quiet\f[R]]
+\f[B]container-gc\f[R] [<\f[I]runtime\f[R]> ...]
+[\f[B]-d\f[R] | \f[B]--debug\f[R]] [\f[B]-h\f[R] | \f[B]--help\f[R]] [\f[B]-q\f[R] | \f[B]--quiet\f[R]] [\f[B]--\f[R]
+<args>]
+.PP
+\f[B]container-gc\f[R] [\f[B]-r\f[R] <*runtime> ...]
+[\f[B]-d\f[R] | \f[B]--debug\f[R]] [\f[B]-h\f[R] | \f[B]--help\f[R]] [\f[B]-q\f[R] | \f[B]--quiet\f[R]] [\f[B]--\f[R]
+<args>]
+.PP
+\f[B]container-gc\f[R] [\f[B]--runtime=\f[R]<\f[I]runtime\f[R]> ...]
+[\f[B]-d\f[R] | \f[B]--debug\f[R]] [\f[B]-h\f[R] | \f[B]--help\f[R]] [\f[B]-q\f[R] | \f[B]--quiet\f[R]] [\f[B]--\f[R]
+<args>]
 .SH DESCRIPTION
 .PP
-This command will prune all containers and dangling volumes and images for both podman and docker.
+This command will prune all containers and dangling volumes and images for nerdctl, podman, and docker.
 At least one of these must be available on the \f[B]PATH\f[R] or the command will fail.
-If both are on the \f[B]PATH\f[R], then both will be pruned.
+If multiple commands are available on the \f[B]PATH\f[R], then each of them will be pruned.
 .PP
-The command essentially performs the following where <command> is either \f[C]podman\f[R] or \f[C]docker\f[R]:
+The command essentially performs the following where <command> is \f[C]nerdctl\f[R], \f[C]podman\f[R] or
+\f[C]docker\f[R]:
 .PP
 <command> container prune --force <command> volume prune --force <command> image prune --force
+.PP
+Any arguments passed after a \f[B]--\f[R] separator will be passed to the underlying runtimes.
 .SH OPTIONS
 .SS FLAGS
 .SS -d, --debug
@@ -27,16 +40,37 @@ print this help information
 .SS -q, --quiet
 .PP
 suppress any output to stdout (any errors will still be printed)
+.SS ARGUMENTS
+.SS <runtime>, -r <runtime>, --runtime=<runtime>
+.PP
+the name of the runtime to garbage collect multiple runtimes may be specified the allowed values are: docker, nerdctl,
+or podman
+.SS <args>
+.PP
+additional arguments to pass to the underlying runtime cli
+.PP
+These arguments must be specified after a \f[B]--\f[R] separator at the end of the command.
 .SH EXAMPLES
 .SS container-gc
 .PP
-garbage collect both docker and podman, if available
+garbage collect nerdctl, podman, and docker, if available
+.SS container-gc -d
 .SS container-gc --debug
 .PP
-garbage collect both docker and podman, if available, while printing the commands as they are executed
+garbage collect nerdctl, podman, and docker, if available, while printing the commands as they are executed
+.SS container-gc docker
+.SS container-gc -r docker
+.SS container-gc --runtime=docker
+.PP
+garbage collect the docker runtime using the current context
+.SS container-gc docker -- --context=docker-root
+.SS container-gc -r docker -- --context=docker-root
+.SS container-gc --runtime=docker -- --context=docker-root
+.PP
+garbage collect the docker runtime using the \f[C]docker-root\f[R] context (this context is an example context)
 .SH SEE ALSO
 .PP
 \f[B]podman-container-prune\f[R](1) (https://docs.podman.io/en/latest/markdown/podman-container-prune.1.html),
 \f[B]sh\f[R](1) (https://man.openbsd.org/sh.1)
 .SH AUTHORS
-Deavon M. McCaffery
+Deavon M. McCaffery; Not Committed Yet
