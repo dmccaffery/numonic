@@ -1,0 +1,67 @@
+.TH "DOWNLOAD-SAFE" "1" "November 30, 2021" "Numonic v1.0.0" "Numonic Manual"
+.nh \" Turn off hyphenation by default.
+.SH NAME
+.PP
+download-safe - downloads a file with support for retries
+.SH SYNOPSIS
+.PP
+\f[B]download-safe\f[R] <\f[I]url\f[R]> [<\f[I]output\f[R]>] [<\f[I]attempts\f[R]>] [\f[B]-d\f[R] | \f[B]--debug\f[R]]
+[\f[B]-h\f[R] | \f[B]--help\f[R]] [\f[B]-q\f[R] | \f[B]--quiet\f[R]]
+.PP
+\f[B]download-safe\f[R] \f[B]-u\f[R] <\f[I]url\f[R]> [\f[B]-o\f[R] <\f[I]output\f[R]>] [\f[B]-a\f[R]
+<\f[I]attempts\f[R]>] [\f[B]-d\f[R] | \f[B]--debug\f[R]] [\f[B]-h\f[R] | \f[B]--help\f[R]] [\f[B]-q\f[R] |
+\f[B]--quiet\f[R]]
+.PP
+\f[B]download-safe\f[R] \f[B]--url=\f[R]<\f[I]url\f[R]> [\f[B]--output=\f[R]<\f[I]output\f[R]>]
+[\f[B]--attempts=\f[R]<\f[I]attempts\f[R]>] [\f[B]-d\f[R] | \f[B]--debug\f[R]] [\f[B]-h\f[R] | \f[B]--help\f[R]]
+[\f[B]-q\f[R] | \f[B]--quiet\f[R]]
+.SH DESCRIPTION
+.PP
+This command downloads a file from the specified <\f[I]url\f[R]> and outputs it to the specified <\f[I]output\f[R]>.
+If the request returns a 404 (NOT FOUND), then the command will fail.
+Any status code that is intermittent will be retried up to the specified attempts.
+.PP
+If attempts are not specified, then the request will be retried 3 times.
+.PP
+If the output is not specified, then the output will be based on the name of the file in the URL and will be output to
+the current working directory.
+.PP
+\f[B]curl\f[R](1) is used to perform the downloads regardless of whether or not \f[B]wget\f[R](1) is available.
+.SH OPTIONS
+.SS FLAGS
+.SS -d, --debug
+.PP
+print the commands as they are executed (set -x)
+.SS -h, --help
+.PP
+print this help information
+.SS -q, --quiet
+.PP
+suppress any output to stdout (any errors will still be printed)
+.SS ARGUMENTS
+.SS <url>, -u <url>, --url=<url>
+.PP
+the url that should be downloaded
+.SS <output>, -o <output>, --output=<output>
+.PP
+the path where the downloaded file should be output if the path is not specified, the filename will be derived from the
+url of the request, which is the value of the last path segment after removing any querystring or anchor elements
+.SS <attempts>, -a <attempts>, --attempts=<attempts>
+.PP
+the number of times to retry the request in the event of an intermittent error (409, 502, 503, 504)
+.SH EXAMPLES
+.SS download-safe https://httpstat.us/200
+.SS download-safe -u https://httpstat.us/200
+.SS download-safe --url https://httpstat.us/200
+.PP
+download a file from the specified url into the current path named \f[C]200\f[R]
+.SS download-safe https://httpstat.us/200 test.txt
+.SS download-safe -u https://httpstat.us/200 -o test.txt
+.SS download-safe --url=https://httpstat.us/200 --output=test.txt
+.PP
+download a file from the specified url into the current path named \f[C]test.txt\f[R]
+.SH SEE ALSO
+.PP
+\f[B]curl\f[R](1)
+.SH AUTHORS
+Deavon M. McCaffery

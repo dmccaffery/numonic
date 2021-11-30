@@ -1,50 +1,139 @@
 #! /usr/bin/env sh
 
 __numonic_download_safe() {
-	url="$1"
-	destination="${2:-${url##*/}}"
-
-	# reset args and fail on http error
-	set -- --write-out '%{http_code}'
-
-	if [ -f "/run/secrets/GITHUB_TOKEN" ]; then
-		if [ "${url#*github}" != "${url}" ]; then
-			GITHUB_TOKEN=$(cat /run/secrets/GITHUB_TOKEN)
-			set -- "$@" --header "'Authorization: token ${GITHUB_TOKEN}'"
-		fi
-	fi
-
-	# set the args
-	set -- "$@" --silent --output "${destination}" --location "${url}"
-	print-warn "download-safe: attempting to download: ${url}"
-
-	attempts=0
-
-	# continue attempting for up to 3 requests
-	while [ $attempts -lt 3 ]; do
-		: $((attempts=attempts+1))
-
-		# get the status code
-		status_code=$(curl "$@")
-
-		# determine if the request was successful; if so, we're good to go
-		test "${status_code}" -eq 200 && return 0
-
-		# print a failure message
-		print-fail "download-safe: failed to download: ${url} after ${attempts} attempts with status code: ${status_code}"
-
-		# determine if the error is non-recoverable (404) and break
-		test "${status_code}" -eq 404 && break
-
-		# wait to retry
-		sleep 10
+	while :; do
+		case $1 in
+			-d|--debug)
+				debug=1
+				;;
+			-h|--help)
+				man download-safe
+				return 0
+				;;
+			-q|--quiet)
+				quiet=1
+				;;
+			-a|--attempts)
+				attempts=${2}
+				shift
+				;;
+			--attempts=*)
+				attempts=${1#*=}
+				;;
+			-o|--output)
+				output="${2}"
+				shift
+				;;
+			--output=*)
+				output="${1#*=}"
+				;;
+			-u|--url)
+				url="${2}"
+				shift
+				;;
+			--url=*)
+				url="${1#*=}"
+				;;
+			*?)
+				if [ -z "${url:-}" ]; then
+					url="${1}"
+				elif [ -z "${output:-}" ]; then
+					output="${1}"
+				elif [ -z "${attempts:-}" ]; then
+					attempts=${1}
+				else
+					print-fail "download-safe: too many arguments, argument: ${1} is unexpected"
+					man download-safe | cat 1>&2
+					return 1
+				fi
+				;;
+			*)
+				break;
+		esac
+		shift
 	done
 
-	# we reached the end of the line
-	printf-fail "download-safe: failed to download: ${url}"
+	if [ -z "${url:-}" ]; then
+		print-fail 'download-safe: url is required'
+		man download-safe | cat 1>&2
+		return 1
+	fi
 
-	# return an error code
-	return 1
+	attempts=${attempts:-3}
+
+	default_output=${url##*/}
+	default_output=${default_output%%\?*}
+	default_output=${default_output%%\#*}
+
+	output=${output:-${default_output}}
+
+	(
+		if [ -n "${quiet:-}" ]; then
+			exec 1>/dev/null
+		fi
+
+		if [ -n "${debug:-}" ]; then
+			set -x
+		fi
+
+		# reset args and fail on http error
+		set -- --write-out '%{http_code}'
+
+		if [ -f "/run/secrets/GITHUB_TOKEN" ]; then
+			if [ "${url#*github}" != "${url}" ]; then
+				GITHUB_TOKEN=$(cat /run/secrets/GITHUB_TOKEN)
+				set -- "$@" --header "'Authorization: token ${GITHUB_TOKEN}'"
+			fi
+		fi
+
+		# set the args
+		set -- "$@" --silent --output "${output}" --location "${url}"
+		print-warn "download-safe: attempting to download: ${url}" 2>&1
+
+		current_attempts=0
+
+		# continue attempting for up to 3 requests
+		while [ ${current_attempts} -lt "${attempts}" ]; do
+			: $((current_attempts=current_attempts+1))
+
+			# get the status code
+			status_code=$(curl "$@")
+
+			# determine if the request was successful; if so, we're good to go
+			if [ "${status_code}" -eq 200 ]; then
+				return 0
+			fi
+
+			# print a failure message
+			print-warn "download-safe: failed to download: ${url} after ${current_attempts} attempts with status code: ${status_code}"
+
+			# determine if the error is retriable, which includes the following:
+			# 409 - Conflict
+			# 502 - Bad Gateway
+			# 503 - Service Unavailable
+			# 504 - Gateway Timeout
+			if [ "${status_code}" -eq 409 ] \
+				|| [ "${status_code}" -eq 502 ] \
+				|| [ "${status_code}" -eq 503 ] \
+				|| [ "${status_code}" -eq 504 ]; then
+
+				# wait for retry
+				sleep 5
+
+				# continue
+				continue
+			fi
+
+			# we are not retriable
+			break
+		done
+
+		# we reached the end of the line
+		print-fail "download-safe: failed to download: ${url}"
+
+		# return an error code
+		return 1
+	)
 }
 
 __numonic_download_safe "$@"
