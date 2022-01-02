@@ -2,7 +2,7 @@
 
 set -e
 
-USERNAME=${1:-build}
+username=${1:-build}
 
 if command -v apt 1>/dev/null 2>&1; then
 	export DEBIAN_FRONTEND=noninteractive
@@ -47,14 +47,6 @@ if [ -n "${yum}" ]; then
 		util-linux-user
 fi
 
-if [ ! -f "/etc/subuid" ]; then
-	touch /etc/subuid
-fi
-
-if [ ! -f "/etc/subgid" ]; then
-	touch /etc/subgid
-fi
-
 # add the user
 useradd \
 	--user-group \
@@ -62,12 +54,12 @@ useradd \
 	--no-log-init \
 	--groups tty \
 	--shell /bin/sh \
-	"${USERNAME}"
+	"${username}"
 
 # own the home for the user
-chown -R "${USERNAME}":"${USERNAME}" /home/"${USERNAME}"
-chmod u=rwx,g=rx,o= /home/"${USERNAME}"
+chown -R "${username}":"${username}" /home/"${username}"
+chmod u=rwx,g=rx,o= /home/"${username}"
 
 # add root and user to sudoers without password
 printf 'root ALL=(ALL) NOPASSWD:ALL\n' > /etc/sudoers.d/99-root
-printf '%s ALL=(ALL) NOPASSWD:ALL\n' "${USERNAME}" > /etc/sudoers.d/99-user
+printf '%s ALL=(ALL) NOPASSWD:ALL\n' "${username}" > /etc/sudoers.d/99-user

@@ -14,9 +14,9 @@ userenv-replace - replaces the value of an existing variable within the user spe
 
 ## DESCRIPTION
 
-This command replaces the value of an exsting value within the user specific environment file, typically located at
+This command replaces the value of an existing value within the user specific environment file, typically located at
 $HOME/.pam_environment. If the variable does not already exist, then the command will fail. To set or add an existing
-variable whther or not it already exists, use **userenv set**. To set a value if and only if it does not already exist,
+variable whether or not it already exists, use **userenv set**. To set a value if and only if it does not already exist,
 use **userenv add**.
 
 Once the new variable is replaces, the environment will be loaded to ensure that the new variable is available within

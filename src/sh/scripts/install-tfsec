@@ -1,0 +1,50 @@
+#! /usr/bin/env sh
+
+set -e
+
+__numonic_install_tfsec() {
+	while :; do
+		case $1 in
+			-d|--debug)
+				debug=1
+				;;
+			-f|--force)
+				force=1
+				;;
+			-h|--help)
+				man install-tfsec
+				return 0
+				;;
+			-q|--quiet)
+				quiet=1
+				;;
+			?*)
+				print-fail "install-tfsec: too many arguments, argument: ${1} is unexpected"
+				man install-tfsec | cat 1>&2
+				return 1
+				;;
+			*)
+				break
+				;;
+		esac
+		shift
+	done
+
+	if [ -z "${force:-}" ] && command -v tfsec 1>/dev/null 2>&1; then
+		print-warn "install-tfsec: tfsec is already on the path at: $(command -v tfsec)" \
+			'to reinstall, use the --force flag'
+		return 1
+	fi
+
+	(
+		if [ -n "${quiet:-}" ]; then
+			exec 1>/dev/null
+		fi
+
+		if [ -n "${debug:-}" ]; then
+			set -x
+		fi
+	)
+}
+
+__numonic_install_tfsec "$@"

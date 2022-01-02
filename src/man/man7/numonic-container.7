@@ -1,16 +1,16 @@
-.TH "NUMONIC-CONTAINER" "7" "November 18, 2021" "Numonic v1.0.0" "Numonic Manual"
+.TH "NUMONIC-CONTAINER" "7" "November 30, 2021" "Numonic v1.0.0" "Numonic Manual"
 .nh \" Turn off hyphenation by default.
 .SH NAME
 .PP
-numonic-container - a collection of utilities for managing containers for both docker and podman
+numonic-container - a collection of utilities for managing containers using nerdctl, podman, and docker
 .SH SYNOPSIS
 .PP
 numonic-container
 .SH DESCRIPTION
 .PP
-Numonic includes a few utilities to make managing container images easier in development worksflows.
-These utilties work with both docker and podman.
-If both container cli tools are available, then the commands will operate on both at the same time.
+Numonic includes a few utilities to make managing container images easier in development workflows.
+These utilities work with nerdctl, podman, and docker.
+If more than one of these commands are available then the operations will be performed on each of them.
 .SH SEE ALSO
 .PP
 \f[B]container-gc\f[R](1), \f[B]container-update\f[R](1)

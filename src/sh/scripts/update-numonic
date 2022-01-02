@@ -2,36 +2,75 @@
 
 set -e
 
+if [ -t 1 ]; then
+	FORMAT_CLEAR=$(tput sgr0)	# CLEAR ALL FORMAT
+	FORMAT_BOLD=$(tput bold)	# SET BRIGHT/BOLD
+
+	CLR_RED=$(tput setaf 1)		# ANSI RED
+	CLR_YELLOW=$(tput setaf 3)	# ANSI YELLOW
+
+	CLR_WARN="${FORMAT_BOLD}${CLR_YELLOW}"
+	CLR_FAIL="${FORMAT_BOLD}${CLR_RED}"
+else
+	FORMAT_CLEAR=''
+
+	CLR_WARN="\n********************************************************************************\n"
+	CLR_FAIL="\n################################################################################\n"
+fi
+
+__numonic_print_warn()
+{
+	printf "${CLR_WARN}%s${FORMAT_CLEAR}\n" "$@"
+}
+
+__numonic_print_fail()
+{
+	printf "${CLR_FAIL}%s${FORMAT_CLEAR}\n" "$@"
+}
+
+alias print-warn='__numonic_print_warn'
+alias print-fail='__numonic_print_fail'
+
 __numonic_update()
 {
-	GITHUB_TOKEN=${GITHUB_TOKEN:-}
-	NUMONIC_TOKEN=${NUMONIC_TOKEN:-}
-	NUMONIC_TOKEN=${NUMONIC_TOKEN:-${GITHUB_TOKEN}}
-	NUMONIC_COMMIT_REF=${NUMONIC_COMMIT_REF:-"master"}
-	NUMONIC_SHELL=${NUMONIC_SHELL:-"bash"}
-	NUMONIC_DRY_RUN=${NUMONIC_DRY_RUN:-}
-
 	while :; do
 		case $1 in
-			-t|--token)
-				NUMONIC_TOKEN=$2
-				shift
-				;;
-			-v|--version)
-				NUMONIC_COMMIT_REF=$2
-				shift
+			--debug)
+				debug=1
 				;;
 			-dr|--dry-run)
-				NUMONIC_DRY_RUN=1
+				dry_run=1
 				;;
 			-f|--force)
 				rm -rf "${HOME}/.local/numonic/.sha" 1>/dev/null 2>&1
 				;;
-			--debug)
-				set -x
+			-o|--org|--organization|--organisation)
+				org="${2}"
+				shift
+				;;
+			--organisation=*|--organization=*)
+				org="${1#*=}"
+				;;
+			-t|--token)
+				NUMONIC_TOKEN="${2}"
+				shift
+				;;
+			--token=*)
+				NUMONIC_TOKEN="${1#*=}"
+				;;
+			-v|--version)
+				version="${2}"
+				shift
+				;;
+			--version=*)
+				version="${1#*=}"
 				;;
 			?*)
-				NUMONIC_SHELL=$1
+				if [ -z "${NUMONIC_SHELL:-}" ]; then
+					NUMONIC_SHELL="${1}"
+				elif [ -z "${version:-}" ]; then
+					version="${1}"
+				fi
 				;;
 			*)
 				break
@@ -40,72 +79,92 @@ __numonic_update()
 		shift
 	done
 
-	# set the arguments to the curl options
-	set -- --silent --write-out '%{http_code}'
+	GITHUB_TOKEN=${GITHUB_TOKEN:-}
+	NUMONIC_TOKEN=${NUMONIC_TOKEN:-${GITHUB_TOKEN}}
+	NUMONIC_SHELL=${NUMONIC_SHELL:-${SHELL}}
+	NUMONIC_SHELL=${NUMONIC_SHELL:-"zsh"}
 
-	# detect if a token is specified
-	if [ -n "${NUMONIC_TOKEN:-}" ]; then
+	version=${version:-"main"}
+	org=${org:-"automotiveMastermind"}
+	sha_url="https://api.github.com/repos/${org}/numonic/commits/${version}?per_page=1"
 
-		# append the token header
-		set -- "$@" --header "'Authorization: token ${NUMONIC_TOKEN}'"
-	fi
-
-	NUMONIC_COMMIT_JSON=$(mktemp)
-	set -- "$@" --output "${NUMONIC_COMMIT_JSON}" --location "https://api.github.com/repos/automotiveMastermind/numonic/commits/${NUMONIC_COMMIT_REF}"
-
-	status_code=$(curl "$@")
-
-	test "${status_code}" -eq 200 && return 0
-
-	# detect if sha could be located
-	if [ -z "${NUMONIC_SHA:-}" ]; then
-		print-fail "numonic: cannot retrieve SHA of latest version. Are you connected to the internet?"
-		return 1
-	fi
-
-	NUMONIC_SHA_PATH=${HOME}/.local/numonic/.sha
-
-	# detect if sha file exists
-	if [ -f "${NUMONIC_SHA_PATH}" ]; then
-
-		# get the value of the sha file
-		NUMONIC_CURRENT_SHA=$(cat "${NUMONIC_SHA_PATH}")
-
-		# print latest version already installed
-		if [ "${NUMONIC_SHA}" = "${NUMONIC_CURRENT_SHA}" ]; then
-			print-success \
-				"numonic: latest version already installed:" \
-				"- run update-numonic with the --force flag to reinstall"
-			return
+	(
+		if [ -n "${quiet:-}" ]; then
+			exec 1>/dev/null
 		fi
-	fi
 
-	if [ -n "${NUMONIC_DRY_RUN:-}" ]; then
-		print-warn '' \
-			"update-numonic: a new version of prompt is available: ${NUMONIC_SHA}" \
-			'run the update-numonic command line tool to upgrade' \
+		if [ -n "${debug:-}" ]; then
+			set -x
+		fi
+
+		set -- --fail --silent --show-error --location
+
+		if [ -n "${NUMONIC_TOKEN:-}" ]; then
+			set -- "$@" --header "'Authorization: token ${NUMONIC_TOKEN}'"
+		fi
+
+		sha=$(curl "$@" "${sha_url}" | grep sha | head -n 1 | sed 's#.*\:.*"\(.*\).*",#\1#')
+
+		# detect if sha could be located
+		if [ -z "${sha:-}" ]; then
+			print-fail "numonic: cannot retrieve SHA of latest version. Are you connected to the internet?"
+			return 1
+		fi
+
+		install_url="https://github.com/${org}/numonic/archive/${sha}.tar.gz"
+
+		print-success '' \
+			'INSTALL/UPDATE NUMONIC' \
+			"ORGANIZATION : ${org}" \
+			"VERSION      : ${version}" \
+			'' \
+			"SHA : ${sha}" \
+			"URL : ${install_url}" \
 		''
-		return 0
-	fi
 
-	NUMONIC_INSTALL_URI="https://github.com/automotiveMastermind/numonic/archive/${NUMONIC_COMMIT_REF}.tar.gz"
-	NUMONIC_INSTALL_TEMP=$(mktemp -d)
+		if [ -n "${dry_run:-}" ]; then
+			return 0
+		fi
 
-	curl --fail \
-		--silent \
-		--show-error \
-		--location \
-		--output "${NUMONIC_INSTALL_TEMP}/numonic.tgz" \
-		"${NUMONIC_INSTALL_URI}"
-	tar --extract \
-		--gzip \
-		--strip-components=1 \
-		--file="${NUMONIC_INSTALL_TEMP}/numonic.tgz" \
-		--directory="${NUMONIC_INSTALL_TEMP}"
+		sha_path=${HOME}/.local/numonic/.sha
 
-	"${NUMONIC_INSTALL_TEMP}/install.sh" "${NUMONIC_SHELL}" "${NUMONIC_INSTALL_TEMP}"
+		# detect if sha file exists
+		if [ -f "${sha_path}" ]; then
+
+			# get the value of the sha file
+			current_sha=$(cat "${sha_path}")
+
+			# print latest version already installed
+			if [ "${sha}" = "${current_sha}" ]; then
+				print-warn \
+					"numonic: latest version already installed: ${sha}" \
+					"  - run update-numonic with the --force flag to reinstall"
+
+				return 0
+			fi
+		fi
+
+		if [ -n "${dry_run:-}" ]; then
+			print-warn \
+				"numonic: a new version of numonic is available: ${sha}" \
+				"  - run the update-numonic command line tool to upgrade"
+
+			return 0
+		fi
+
+		install_temp=$(mktemp -d)
+
+		curl "$@" --output "${install_temp}/numonic.tgz" "${install_url}"
+		tar --extract \
+			--gzip \
+			--strip-components=1 \
+			--file="${install_temp}/numonic.tgz" \
+			--directory="${install_temp}"
+
+		"${install_temp}/install.sh" "${NUMONIC_SHELL}" "${install_temp}"
+	)
 }
 
-trap 'print-warn "numonic: terminating update..."; exit 1;' INT
+trap 'print-fail "numonic: terminating update..."; exit 1;' INT
 
 __numonic_update "$@"

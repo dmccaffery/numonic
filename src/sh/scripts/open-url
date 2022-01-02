@@ -45,12 +45,12 @@ __numonic_open_url() {
 	fi
 
 	(
-		if [ -n "${debug:-}" ]; then
-			set -x
-		fi
-
 		if [ -n "${quiet:-}" ]; then
 			exec 1>/dev/null
+		fi
+
+		if [ -n "${debug:-}" ]; then
+			set -x
 		fi
 
 		# iterate over all well-known commands

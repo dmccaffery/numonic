@@ -15,7 +15,139 @@ They are also tied into the git help system.
 For example, \f[C]man git-fork-clone\f[R] or \f[C]git fork-clone --help\f[R] will both pull up the manual for the
 \f[C]fork-clone\f[R] extension.
 .SH AVAILABLE COMMANDS
+.SS FORK WORKFLOW
+.IP \[bu] 2
+\f[B]git-fork-clone\f[R](1)
+.IP \[bu] 2
+\f[B]git-start\f[R](1)
+.IP \[bu] 2
+\f[B]git-pull-request\f[R](1)
+.IP \[bu] 2
+\f[B]git-fork-done\f[R](1)
+.SS COMMIT AND IDEATE
+.IP \[bu] 2
+\f[B]git-commit-all\f[R](1)
+.IP \[bu] 2
+\f[B]git-commit-amend\f[R](1)
+.IP \[bu] 2
+\f[B]git-commit-mark\f[R](1)
+.IP \[bu] 2
+\f[B]git-commit-restore\f[R](1)
+.IP \[bu] 2
+\f[B]git-commit-save\f[R](1)
+.IP \[bu] 2
+\f[B]git-commit-undo\f[R](1)
+.IP \[bu] 2
+\f[B]git-commit-wip\f[R](1)
+.IP \[bu] 2
+\f[B]git-reset-head\f[R](1)
+.SS STAYING IN SYNC
+.IP \[bu] 2
+\f[B]git-delete-gone\f[R](1)
+.IP \[bu] 2
+\f[B]git-delete-merged\f[R](1)
+.IP \[bu] 2
+\f[B]git-remote-prune\f[R](1)
+.IP \[bu] 2
+\f[B]git-done\f[R](1)
+.IP \[bu] 2
+\f[B]git-update\f[R](1)
+.SS CONFIGURATION
+.IP \[bu] 2
+\f[B]git-edit-config\f[R](1)
+.SH ALIASES
 .PP
-checkout-branch - a command used to create and switch to a new local branch
+The above commands are built as extensions to the git cli and participate with the help system based on manual pages.
+They are intentionally long and descriptive to avoid clobbering existing aliases and are intended to (hopefully) avoid
+any collisions with any future updates to the git command structure itself.
+.PP
+If you would like to enable short-form aliases for these commands, you can do so as follows (for example):
+.IP
+.nf
+\f[C]
+git config --global alias.cm=\[aq]commit-all\[aq]
+git config --global alias.fd=\[aq]fork-done\[aq]
+\f[R]
+.fi
+.PP
+Alternatively, you can edit the configuration in an editor and add aliases:
+.IP
+.nf
+\f[C]
+git edit-config
+# OR
+git config --global --edit
+\f[R]
+.fi
+.PP
+The following is an example set of aliases that may be useful:
+.IP
+.nf
+\f[C]
+[alias]
+  ec = \[aq]edit-config\[aq]
+  fc = \[aq]fork-clone\[aq]
+  cob = \[aq]start\[aq]
+  pr = \[aq]pull-request\[aq]
+  fd = \[aq]fork-done\[aq]
+\f[R]
+.fi
+.SH GETTING HELP
+.PP
+All git command extensions are available as manual pages, which can be retrieved the same way as any other git command.
+For instance:
+.IP
+.nf
+\f[C]
+man git-pull-request
+# OR
+git pull-request --help
+\f[R]
+.fi
+.PP
+Tab completion is available for the commands themselves but not for command arguments.
+This is an area where we hope to improve over time.
+.SH EXAMPLES
+.SS STANDARD WORKFLOW WHEN USING FORKS
+.IP
+.nf
+\f[C]
+# create a directory with the name of the upstream git organization
+mkdir -p \[ti]/Repos/automotivemastermind
+cd \[ti]/Repos/automotivemastermind
+
+# clone your fork of the upstream repository
+# this will clone the fork as the origin and also configure the upstream remote based on the name of the current
+# directory (automotivemastermind)
+git fork-clone https://github.com/dmccaffery/numonic
+cd numonic
+
+# create a feature/fix branch
+# this will create the branch locally, switch to that branch, and immediately push a copy to the origin (your fork)
+git start feat/some-feature
+
+# after making changes, you can commit as usual as often as you like
+git commit
+
+# setup for a pull request
+# this will fetch the latest from the upstream default branch and rebase your commits including sign-off this ensures
+# that any merge conflicts can be resolved locally before opening the pull request and also ensures that all commits are
+# signed
+git pull-request
+
+# move to the default branch and merge (--fast-forward) the upstream to the origin so you can start working on the next
+# feature or fix -- any branches that have been successfully merged into the upstream will be removed from both the
+# local copy and the origin and any branches that no longer exist on the origin will also be removed locally -- this
+# keeps the fork in perfect sync with the upstream (except for those branches where pull requests are still pending)
+git done
+\f[R]
+.fi
+.SH SEE ALSO
+.PP
+\f[B]git-fork-clone\f[R](1), \f[B]git-start\f[R](1), \f[B]git-pull-request\f[R](1), \f[B]git-fork-done\f[R](1),
+\f[B]git-commit-all\f[R](1), \f[B]git-commit-amend\f[R](1), \f[B]git-commit-mark\f[R](1),
+\f[B]git-commit-restore\f[R](1), \f[B]git-commit-save\f[R](1), \f[B]git-commit-undo\f[R](1),
+\f[B]git-commit-wip\f[R](1), \f[B]git-reset-head\f[R](1), \f[B]git-delete-gone\f[R](1), \f[B]git-delete-merged\f[R](1),
+\f[B]git-remote-prune\f[R](1), \f[B]git-done\f[R](1), \f[B]git-update\f[R](1), \f[B]git-edit-config\f[R](1)
 .SH AUTHORS
-Deavon M. McCaffery
+Deavon M. McCaffery; Not Committed Yet

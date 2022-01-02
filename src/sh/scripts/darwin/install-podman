@@ -3,13 +3,16 @@
 set -e
 
 __numonic_install_podman() {
-
 	while :; do
 		case $1 in
 			-d|--debug)
 				debug=1
 				;;
 			-f|--force)
+				if [ -f "${NUMONIC_BIN}"/docker ]; then
+					rm -f "${NUMONIC_BIN}"/docker
+				fi
+
 				force=1
 				;;
 			-h|--help)
@@ -34,40 +37,33 @@ __numonic_install_podman() {
 	if [ -z "${force:-}" ] && command -v podman 1>/dev/null 2>&1; then
 		print-warn "install-podman: podman is already on the path at: $(command -v podman)" \
 			'to reinstall, use the --force flag'
-		man install-podman | cat 1>&2
 		return 1
 	fi
 
 	(
-		if [ -n "${debug:-}" ]; then
-			set -x
-		fi
-
 		if [ -n "${quiet:-}" ]; then
 			exec 1>/dev/null
 		fi
 
-		brews='qemu lima podman skopeo'
+		if [ -n "${debug:-}" ]; then
+			set -x
+		fi
 
-		brew update
-
-		for pkg in ${brews}; do
-			if brew list --versions "${pkg}" 1>/dev/null; then
-				print-success "install-podman: upgrading ${pkg}..."
-				brew upgrade "${pkg}" 2>/dev/null
-				brew link --overwrite "${pkg}" 2>/dev/null
-			else
-				print-success "install-podman: installing ${pkg}..."
-				brew install "${pkg}"
-			fi
-		done
+		# shellcheck disable=SC2086
+		install-brew-formulae \
+			--name=podman \
+			--brew=docker \
+			--brew=qemu \
+			--brew=lima \
+			--brew=podman \
+			--brew=skopeo
 
 		if [ ! -d "${HOME}"/.lima ]; then
 			mkdir -p "${HOME}"/.lima
 		fi
 
 		if limactl list 2>&1 | grep podman 1>/dev/null 2>&1; then
-			print-success 'install-podman: stoping existing lima guest...'
+			print-success 'install-podman: stopping existing lima guest...'
 			limactl stop podman --force
 			limactl delete podman --force
 		fi
@@ -77,30 +73,54 @@ __numonic_install_podman() {
 
 		# shellcheck disable=SC2016
 		print-warn '' \
-			'install-podman: you will be prompted to modify the configuration -- we recommend verifying the cpu and' \ 'memory limits with at least 1GiB of memory per cpu.' \
+			'install-podman: you will be prompted to modify the configuration -- we recommend verifying the cpu and' \
+			'memory limits with at least 1GiB of memory per cpu.' \
 			'' \
-			'By default, only $HOME and /tmp/lima is bind mountable. The $HOME path is configured to be read-only.'
+			'By default, only $HOME and /tmp/lima is bind mountable. The $HOME path is configured to be read-only.' 2>&1
 
 		limactl start "${NUMONIC_HOME}"/sh/scripts/darwin/lima/podman.yaml
 
+		# restart to pickup the docker group
+		print-success 'install-podman: restarting lima to complete configuration'
+		limactl stop podman
+		sleep 2 # race condition on host agent
+		limactl start podman
+
 		if podman system connection list | grep numonic-root 1>/dev/null 2>&1; then
 			print-success 'install-podman: removing existing numonic-root connection...'
-			podman system connection remove numonic-root
+			podman system connection rm numonic-root
 		fi
 
 		if podman system connection list | grep numonic 1>/dev/null 2>&1; then
 			print-success 'install-podman: removing existing numonic connection...'
-			podman system connection remove numonic
+			podman system connection rm numonic
 		fi
 
 		podman system connection add numonic unix://"${HOME}"/.lima/podman/user.sock
 		podman system connection add numonic-root unix://"${HOME}"/.lima/podman/root.sock
 		podman system connection default numonic
 
-		if ! command -v docker 1>/dev/null 2>&1; then
-			print-success 'install-podman: symlink docker to podman...'
-			ln -fs "$(command -v podman)" "${NUMONIC_BIN}"/docker
+		print-success 'install-podman: setting docker context to podman...'
+		docker context rm podman-root --force 2>/dev/null || true
+		docker context rm podman-rootless --force 2>/dev/null || true
+
+		if [ -S "${HOME}"/.lima/podman/root.sock ]; then
+			docker context create podman-root \
+				--description "access to root podman in lima" \
+				--docker="host=unix://${HOME}/.lima/podman/root.sock"
 		fi
+
+		if [ -S "${HOME}"/.lima/podman/user.sock ]; then
+			docker context create podman-rootless \
+				--description "access to rootless podman in lima" \
+				--docker="host=unix://${HOME}/.lima/podman/user.sock"
+		fi
+
+		print-success 'install-podman: the following connections are available within the podman-cli'
+		podman system connection ls
+
+		print-success 'install-podman: the following contexts are available within the docker-cli'
+		docker context ls
 
 		print-success '' 'install-podman: podman is now ready.'
 

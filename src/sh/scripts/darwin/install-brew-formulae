@@ -1,0 +1,103 @@
+#! /usr/bin/env sh
+
+set -e
+
+__numonic_install_brew_formulae() {
+	brew_cmd=install
+
+	while :; do
+		case $1 in
+			-d|--debug)
+				debug=1
+				;;
+			-f|--force)
+				brew_cmd=reinstall
+				;;
+			-h|--help)
+				(man install-"${name:-brew-formulae}" 2>&1 || man install-brew-formulae)
+				return 0
+				;;
+			-q|--quiet)
+				quiet=1
+				;;
+			-n|--name)
+				name="${2}"
+				shift
+				;;
+			--name=*)
+				name="${1#*=}"
+				;;
+			-b|--brew|--brews)
+				brews="${brews} ${2}"
+				shift
+				;;
+			--brew=*|--brews=*)
+				brews="${brews} ${1#*=}"
+				;;
+			-t|--tap|--taps)
+				taps="${taps} ${2}"
+				shift
+				;;
+			--tap=*|--taps=*)
+				taps="${taps} ${1#*=}"
+				;;
+			-o|--output)
+				print-warn "install-${name:-brew-formulae}: output is ignored on macOS"
+				shift
+				;;
+			--output=*)
+				print-warn "install-${name:-brew-formulae}: output is ignored on macOS"
+				;;
+			?*)
+				if [ -z "${name:-}" ]; then
+					name="${1}"
+				else
+					print-fail "install-${name:-brew-formulae}: too many arguments, argument: ${1} is unexpected"
+					(man install-"${name:-brew-formulae}" 2>&1 || man install-brew-formulae) | cat 1>&2
+					return 1
+				fi
+				;;
+			*)
+				break
+				;;
+		esac
+		shift
+	done
+
+	if [ -z "${name:-}" ]; then
+		print-fail 'install-brew-formulae: name is required'
+		man install-brew-formulae | cat 1>&2
+		return 1
+	fi
+
+	(
+		if [ -n "${quiet:-}" ]; then
+			exec 1>/dev/null
+		fi
+
+		if [ -n "${debug:-}" ]; then
+			set -x
+		fi
+
+		for tap in ${taps}; do
+			if [ -z "${tap:-}" ]; then
+				continue
+			fi
+
+			brew tap "${tap}"
+		done
+
+		brew update
+
+		if [ -z "${brews:-}" ]; then
+			brews=" ${name}"
+		fi
+
+		print-success "install-${name}: installing${brews}..."
+
+		# shellcheck disable=SC2086
+		brew ${brew_cmd} ${brews}
+	)
+}
+
+__numonic_install_brew_formulae "$@"

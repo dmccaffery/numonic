@@ -17,9 +17,9 @@ ENV NUMONIC_CONTAINER="true" \
     _CONTAINERS_USERNS_CONFIGURED=""
 
 RUN set -e; \
-    ./install.sh ${NUMONIC_SHELL}; \
-    ./hack/clean.sh --force;
+    ./install-numonic --shell="${NUMONIC_SHELL}"; \
+    cp containers/entrypoint.sh /home/numonic/.local/bin/entrypoint; \
+    ./containers/clean.sh --force
 
 WORKDIR /home/numonic
-COPY containers/entrypoint.sh /home/numonic/.local/bin/entrypoint
 ENTRYPOINT [ "/home/numonic/.local/bin/entrypoint" ]

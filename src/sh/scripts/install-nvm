@@ -1,0 +1,99 @@
+#! /usr/bin/env sh
+
+set -e
+
+__numonic_nvm_install() {
+	while :; do
+		case $1 in
+			-d|--debug)
+				debug=1
+				;;
+			-f|--force)
+				if [ -d "${HOME}"/.nvm ]; then
+					rm -rf "${HOME}"/.nvm 1>/dev/null
+				fi
+
+				if [ -d "${NUMONIC_SHARE}/nvm" ]; then
+					rm -rf "${NUMONIC_SHARE}/nvm" 1>/dev/null
+				fi
+				;;
+			-h|--help)
+				man install-nvm
+				return 0
+				;;
+			-o|--output)
+				output="${2}"
+				;;
+			-q|--quiet)
+				quiet=1
+				;;
+			--output=*)
+				output="${1#*=}"
+				;;
+			-v|--version)
+				version="${2#v*}"
+				shift
+				;;
+			?*)
+				print-fail "install-nvm: too many arguments, argument: ${1} is unexpected"
+				man install-nvm | cat 1>&2
+				return 1
+				;;
+			*)
+				break
+				;;
+		esac
+		shift
+	done
+
+	version=${version:-$(github-release nvm-sh nvm)}
+	output=${output:-${NUMONIC_SHARE}/nvm}
+
+	if [ -f "${output}/nvm.sh" ]; then
+		print-warn "install-nvm: nvm is already installed at: ${output}/nvm.sh" \
+			'to reinstall, use the --force flag'
+		return 1
+	fi
+
+	(
+		if [ -n "${quiet:-}" ]; then
+			exec 1>/dev/null
+		fi
+
+		if [ -n "${debug:-}" ]; then
+			set -x
+		fi
+
+		if [ -d "${output:-}" ]; then
+			rm -rf "${output}"
+		fi
+
+		mkdir -p "${output}"
+
+		url="https://github.com/nvm-sh/nvm/archive/refs/tags/v${version}.tar.gz"
+
+		print-success "install-nvm: downloading nvm..."
+		temp=$(mktemp -d)
+		download-safe "${url}" "${temp}/nvm.tar.gz"
+
+		tar --extract \
+			--gzip \
+			--strip-components=1 \
+			--file="${temp}"/nvm.tar.gz \
+			--directory="${output}"
+
+		export NVM_DIR="${output}"
+		. "${NVM_DIR}"/nvm.sh
+
+		# install the default
+		print-success "install-nvm: installing lts node as default"
+		nvm install --lts 2>&1
+
+		# shellcheck disable=SC2016
+		print-warn '' \
+			'install-nvm: you MUST start a new shell to enable nvm...' \
+			'exec $SHELL -l'
+	)
+}
+
+__numonic_nvm_install "$@"

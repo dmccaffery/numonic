@@ -1,0 +1,84 @@
+#! /usr/bin/env sh
+
+set -e
+
+__numonic_install_aws_sam_cli() {
+	install_dir="${NUMONIC_SHARE}/aws-sam-cli"
+
+	while :; do
+		case $1 in
+			-d|--debug)
+				debug=1
+				;;
+			-h|--help)
+				man install-aws-sam-cli
+				return 0
+				;;
+			-f|--force)
+				if [ -d "${install_dir}" ]; then
+					rm -rf "${install_dir}"
+				fi
+
+				if command -v aws-sam-cli 1>/dev/null 2>&1; then
+					print-fail "install-aws-sam-cli: aws-sam-cli is already on the path at: $(command -v aws-sam-cli)" \
+						'This version was not installed using numonic.' \
+						'Please remove using the package manager that was used to install it.'
+					return 1
+				fi
+				;;
+			?*)
+				print-fail "install-aws-sam-cli: too many arguments, argument: ${1} is unexpected"
+				man install-aws-sam-cli | cat 1>&2
+				return 1
+				;;
+			*)
+				break
+				;;
+		esac
+		shift
+	done
+
+	if command -v aws-sam-cli 1>/dev/null 2>&1; then
+		print-warn "install-aws-sam-cli: aws-sam-cli is already on the path at: $(command -v aws-sam-cli)" \
+			'to reinstall, use the --force flag'
+		return 1
+	fi
+
+	if command -v python3 1>/dev/null 2>&1; then
+		python_cmd=$(command -v python3)
+	elif command -v python 1>/dev/null 2>&1; then
+		python_cmd=$(command -v python)
+	elif command -v install-python 1>/dev/null 2>&1; then
+		install-python
+		python_cmd=$(command -v python3 || command -v python)
+	else
+		print-fail "install-aws-sam-cli: neither python3 nor python is available on the PATH." \
+			"please install python3 via a package manager"
+		man install-aws-sam-cli | cat 1>&2
+		return 1
+	fi
+
+	(
+		if [ -n "${debug:-}" ]; then
+			set -x
+		fi
+
+		print-warn 'install-aws-sam-cli: creating virtual environment for aws-sam-cli...'  2>&1
+		"${python_cmd}" -m venv "${install_dir}"
+
+		# set the python cmd to the new venv
+		python_cmd="${install_dir}"/bin/python
+
+		print-warn 'install-aws-sam-cli: upgrading pip in virtual environment...'  2>&1
+		"${python_cmd}" -m pip install --upgrade pip 1>/dev/null 2>&1
+
+		print-warn 'install-aws-sam-cli: installing aws-sam-cli, this may take a minute or two...'  2>&1
+		"${python_cmd}" -m pip install --upgrade aws-sam-cli 1>/dev/null 2>&1
+
+		ln -fs "${install_dir}"/bin/aws-sam-cli "${NUMONIC_BIN}"
+	)
+
+	print-success 'install-aws-sam-cli: the aws-sam-cli is now ready'
+}
+
+__numonic_install_aws_sam_cli "$@"

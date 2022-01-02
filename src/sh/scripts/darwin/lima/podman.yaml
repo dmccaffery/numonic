@@ -1,3 +1,5 @@
+name: podman
+
 cpus: 2
 memory: 4GiB
 disk: 100GiB
@@ -5,6 +7,7 @@ disk: 100GiB
 ssh:
   localPort: 0
   loadDotSSHPubKeys: true
+  forwardAgent: false
 
 mounts:
   - location: "~"
@@ -32,11 +35,16 @@ provision:
       command -v podman >/dev/null 2>&1 && exit 0
       dnf install -y podman crun
       systemctl enable --now podman.socket
+      systemctl enable --now chronyd.service
+      groupadd -f podman
+      chown :podman /run/podman/podman.sock
+
   - mode: user
     script: |
       #!/bin/bash
       set -eux -o pipefail
       systemctl --user enable --now podman.socket
+      sudo usermod -aG podman "$(whoami)"
 
 probes:
   - script: |

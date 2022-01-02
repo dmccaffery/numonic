@@ -25,7 +25,7 @@ __numonic_git_commit_wip() {
 				if [ "${message}" = "[WIP]" ]; then
 					message="[WIP] ${1}"
 				else
-					print-fail "git wip: too many arguments, argument: ${1} is unexpected"
+					print-fail "git commit-wip: too many arguments, argument: ${1} is unexpected"
 					man git-commit-wip | cat 1>&2
 					return 1
 				fi
@@ -42,7 +42,7 @@ __numonic_git_commit_wip() {
 		fi
 
 		git add --all
-		git commit --all --message "${message}"
+		git commit --signoff --message "${message}"
 		git push origin HEAD
 	)
 }

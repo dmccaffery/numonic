@@ -9,7 +9,7 @@ __numonic_set_gcloud_path() {
 		if [ ! -f "${NUMONIC_SHARE}"/gcloud/bin/gcloud ]; then
 
 			# no gcloud installed
-			return
+			return 0
 		fi
 
 		# add gcloud to the path

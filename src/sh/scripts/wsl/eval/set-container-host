@@ -1,0 +1,11 @@
+#! /usr/bin/env sh
+
+
+if ! command -v docker 1>/dev/null 2>&1; then
+	return 0
+fi
+
+if [ -S "${XDG_RUNTIME_DIR}"/podman/podman.sock ] && ! pgrep podman 1>/dev/null 2>&1; then
+	socket="unix://${XDG_RUNTIME_DIR}/podman/podman.sock"
+	podman system service --time 0 "${socket}" &
+fi

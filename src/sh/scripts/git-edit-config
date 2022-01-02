@@ -3,8 +3,6 @@
 set -e
 
 __numonic_git_edit_config() {
-	positional=
-
 	while :; do
 		case $1 in
 			-d|--debug)
@@ -14,21 +12,11 @@ __numonic_git_edit_config() {
 				man git-edit-config
 				return 0
 				;;
-			*?)
-				if [ -z "${positional:-}" ]; then
-					positional="${1}"
-				else
-					positional="${positional} ${1}"
-				fi
-				;;
 			*)
 				break;
 		esac
 		shift
 	done
-
-	# shellcheck disable=SC2086
-	set -- ${positional}
 
 	(
 		if [ -n "${debug:-}" ]; then

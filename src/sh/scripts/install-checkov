@@ -1,0 +1,83 @@
+#! /usr/bin/env sh
+
+set -e
+
+__numonic_install_checkov() {
+	install_dir="${NUMONIC_SHARE}/checkov"
+
+	while :; do
+		case $1 in
+			-d|--debug)
+				debug=1
+				;;
+			-h|--help)
+				man install-checkov
+				return 0
+				;;
+			-f|--force)
+				if [ -d "${install_dir}" ]; then
+					rm -rf "${install_dir}"
+				fi
+
+				if command -v checkov 1>/dev/null 2>&1; then
+					print-fail "install-checkov: checkov is already on the path at: $(command -v checkov)" \
+						'This version was not installed using numonic.' \
+						'Please remove using the package manager that was used to install it.'
+					return 1
+				fi
+				;;
+			?*)
+				print-fail "install-checkov: too many arguments, argument: ${1} is unexpected"
+				man install-checkov | cat 1>&2
+				return 1
+				;;
+			*)
+				break
+				;;
+		esac
+		shift
+	done
+
+	if command -v checkov 1>/dev/null 2>&1; then
+		print-warn "install-checkov: checkov is already on the path at: $(command -v checkov)" \
+			'to reinstall, use the --force flag'
+		return 1
+	fi
+
+	if command -v python3 1>/dev/null 2>&1; then
+		python_cmd=$(command -v python3)
+	elif command -v python 1>/dev/null 2>&1; then
+		python_cmd=$(command -v python)
+	elif command -v install-python 1>/dev/null 2>&1; then
+		install-python
+		python_cmd=$(command -v python3 || command -v python)
+	else
+		print-fail "install-checkov: neither python3 nor python is available on the PATH." \
+			"please install python3 via a package manager"
+		man install-checkov | cat 1>&2
+		return 1
+	fi
+
+	(
+		if [ -n "${debug:-}" ]; then
+			set -x
+		fi
+
+		print-warn 'install-checkov: creating virtual environment for checkov...'  2>&1
+		"${python_cmd}" -m venv "${install_dir}"
+
+		python_cmd="${install_dir}"/bin/python
+
+		print-warn 'install-checkov: upgrading pip and setuptools in virtual environment...'  2>&1
+		"${python_cmd}" -m pip install --upgrade pip setuptools wheel 1>/dev/null 2>&1
+
+		print-warn 'install-checkov: installing checkov, this may take a minute or two...'  2>&1
+		"${python_cmd}" -m pip install --upgrade checkov 1>/dev/null 2>&1
+
+		ln -fs "${install_dir}"/bin/checkov "${NUMONIC_BIN}"
+	)
+
+	print-success 'install-checkov: the checkov is now ready'
+}
+
+__numonic_install_checkov "$@"

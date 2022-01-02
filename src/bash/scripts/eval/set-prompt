@@ -20,7 +20,4 @@ if command -v starship 1>/dev/null 2>&1; then
 	# set the window title
 	# shellcheck disable=SC2034
 	starship_precmd_user_func='__numonic_set_window_title'
-
-	# move on immediately
-	return
 fi

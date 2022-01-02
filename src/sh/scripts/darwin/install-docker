@@ -1,0 +1,120 @@
+#! /usr/bin/env sh
+
+set -e
+
+__numonic_install_docker() {
+	while :; do
+		case $1 in
+			-d|--debug)
+				debug=1
+				;;
+			-f|--force)
+				if [ -f "${NUMONIC_BIN}"/docker ]; then
+					rm -f "${NUMONIC_BIN}"/docker
+				fi
+
+				force=1
+				;;
+			-h|--help)
+				man install-docker
+				return 0
+				;;
+			-q|--quiet)
+				quiet=1
+				;;
+			?*)
+				print-fail "install-docker: too many arguments, argument: ${1} is unexpected"
+				man install-docker | cat 1>&2
+				return 1
+				;;
+			*)
+				break
+				;;
+		esac
+		shift
+	done
+
+	if [ -z "${force:-}" ] && command -v docker 1>/dev/null 2>&1; then
+		print-warn "install-podman: podman is already on the path at: $(command -v podman)" \
+			'to reinstall, use the --force flag'
+		return 1
+	fi
+
+	(
+		if [ -n "${quiet:-}" ]; then
+			exec 1>/dev/null
+		fi
+
+		if [ -n "${debug:-}" ]; then
+			set -x
+		fi
+
+		install-brew-formulae \
+			--name=docker \
+			--brew=docker \
+			--brew=qemu \
+			--brew=lima
+
+		if [ ! -d "${HOME}"/.lima ]; then
+			mkdir -p "${HOME}"/.lima
+		fi
+
+		if limactl list 2>&1 | grep docker 1>/dev/null 2>&1; then
+			print-success 'install-docker: stopping existing lima guest...'
+			limactl stop docker --force
+			limactl delete docker --force
+		fi
+
+		print-success 'install-docker: installing / updating lima guest...'
+		limactl prune 1>/dev/null 2>&1 || true
+
+		# shellcheck disable=SC2016
+		print-warn '' \
+			'install-docker: you will be prompted to modify the configuration -- we recommend verifying the cpu and' \
+			'memory limits with at least 1GiB of memory per cpu.' \
+			'' \
+			'By default, only $HOME and /tmp/lima is bind mountable. The $HOME path is configured to be read-only.' 2>&1
+
+		limactl start "${NUMONIC_HOME}"/sh/scripts/darwin/lima/docker.yaml
+
+		# restart to pickup the docker group
+		print-success 'install-docker: restarting lima to complete configuration'
+		limactl stop docker
+		sleep 2 # race condition on host agent
+		limactl start docker
+
+		# setup the contexts
+		print-success 'install-docker: setting docker contexts'
+		docker context rm docker-root --force 1>/dev/null 2>&1 || true
+		docker context rm docker-rootless --force 1>/dev/null 2>&1 || true
+
+		if [ -S "${HOME}"/.lima/docker/root.sock ]; then
+			docker context create docker-root \
+				--description "access to root docker in lima" \
+				--docker="host=unix://${HOME}/.lima/docker/root.sock"
+
+			# set root to default (will be replaced with rootless if the socket exists)
+			docker context use docker-root
+		fi
+
+		if [ -S "${HOME}"/.lima/docker/user.sock ]; then
+			docker context create docker-rootless \
+				--description "access to rootless docker in lima" \
+				--docker="host=unix://${HOME}/.lima/docker/user.sock"
+
+			# set rootless as default
+			docker context use docker-rootless
+		fi
+
+		print-success 'install-docker: the following contexts are available within the docker-cli'
+		docker context ls
+
+		# shellcheck disable=SC2016
+		print-warn '' \
+			'install-docker: start a new shell to enable tab completion' \
+			'exec $SHELL -l' \
+		''
+	)
+}
+
+__numonic_install_docker "$@"

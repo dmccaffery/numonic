@@ -65,8 +65,8 @@ __numonic_install_golang() {
 
 		if command -v go 1>/dev/null 2>&1; then
 			if [ -z "${version:-}" ]; then
-				print-warn "install-golang: golang is already on the path at: $(command -v go)"
-				print-warn 'install-golang: to reinstall, use the --force flag'
+				print-warn "install-golang: gcloud is already on the path at: $(command -v go)" \
+					'to reinstall, use the --force flag'
 				return 1
 			fi
 

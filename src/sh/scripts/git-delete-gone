@@ -3,12 +3,12 @@
 set -e
 
 __numonic_git_delete_gone() {
-	remote=
+	remotes=
 
 	while :; do
 		case $1 in
 			--help)
-				man git-remote-prune
+				man git-delete-gone
 				return 0
 				;;
 			-dr|--dry-run)
@@ -18,19 +18,14 @@ __numonic_git_delete_gone() {
 				debug=1
 				;;
 			--remote)
-				remote="${2}"
+				remotes="${remotes} ${2}"
 				shift
 				;;
 			--remote=*)
-				remote="${1#*=}"
+				remote="${remotes} ${1#*=}"
 				;;
 			?*)
-				if [ -z "${remote:-}" ]; then
-					remote="${1}"
-				else
-					print-fail "git remote-prune: too many arguments, argument: ${1} is unexpected"
-					man git-remote-prune | cat 1>&2
-				fi
+				remotes="${remotes} ${1}"
 				;;
 			*)
 				break
@@ -39,14 +34,18 @@ __numonic_git_delete_gone() {
 		shift
 	done
 
-	if [ -z "${remote:-}" ]; then
-		remote="origin"
+	if [ -z "${remotes:-}" ]; then
+		remotes=$(git remote)
 	fi
 
-	print-warn '' \
-		'GIT DELETE GONE' \
-		"remote: ${remote}" \
-	''
+
+	print-warn '' 'GIT DELETE GONE'
+
+	for remote in ${remotes}; do
+		print-warn "remote: ${remote}"
+	done
+
+	printf '\n'
 
 	if [ -n "${dry_run:-}" ]; then
 		return 0
@@ -57,7 +56,14 @@ __numonic_git_delete_gone() {
 			set -x
 		fi
 
-		git fetch --prune --prune-tags "${remote}"
+		for remote in ${remotes}; do
+			if [ "${remote}" = "upstream" ]; then
+				git fetch --prune --prune-tags "${remote}"
+			else
+				git fetch --prune "${remote}"
+			fi
+		done
+
 		git branch --verbose \
 			| grep 'gone]' \
 			| cut -d ' ' -f 3 \

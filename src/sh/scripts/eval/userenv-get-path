@@ -20,6 +20,7 @@ __numonic_userenv_get_path() {
 				fi
 				;;
 		esac
+
 		old=${old#*:}
 	done
 

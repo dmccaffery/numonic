@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
 if [ -n "${NUMONIC_BASH:-}" ]; then
-	return
+	return 0
 fi
 
 printf "\n%s\n" "numonic: using bash shell"

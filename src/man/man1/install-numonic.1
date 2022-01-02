@@ -1,0 +1,175 @@
+.\"t
+.TH "INSTALL-NUMONIC" "1" "November 28, 2021" "Numonic v1.0.0" "Numonic Manual"
+.nh \" Turn off hyphenation by default.
+.SH NAME
+.PP
+install-numonic - installs numonic for the current operating system
+.SH SYNOPSIS
+.PP
+\f[B]install-numonic\f[R] <\f[I]shell\f[R]> [\f[B]-d\f[R] | \f[B]--debug\f[R] ] [\f[B]-h\f[R] | \f[B]--help\f[R]]
+[\f[B]-nd\f[R] | \f[B]--no-dependencies\f[R]] [\f[B]-q\f[R] | \f[B]--quiet\f[R]]
+.PP
+\f[B]install-numonic\f[R] \f[B]-s\f[R] <\f[I]shell\f[R]> [\f[B]-d\f[R] | \f[B]--debug\f[R] ] [\f[B]-h\f[R] |
+\f[B]--help\f[R]] [\f[B]-nd\f[R] | \f[B]--no-dependencies\f[R]] [\f[B]-q\f[R] | \f[B]--quiet\f[R]]
+.PP
+\f[B]install-numonic\f[R] \f[B]--shell=\f[R]<\f[I]shell\f[R]> [\f[B]-d\f[R] | \f[B]--debug\f[R] ] [\f[B]-h\f[R] |
+\f[B]--help\f[R]] [\f[B]-nd\f[R] | \f[B]--no-dependencies\f[R]] [\f[B]-q\f[R] | \f[B]--quiet\f[R]]
+.SH DESCRIPTION
+.PP
+This command is only available when cloning the repository or using \f[B]numonic-bootstrap\f[R](1) to acquire a version
+of the numonic repository.
+It is responsible for detecting the platform in use and performing a complete installation of numonic.
+.SS WHAT HAPPENS
+.PP
+Numonic will install the prerequisites above (unless the \f[C]--no-dependencies\f[R] flag was set).
+It will then extract shell scripts and supporting files (such as themes) to \f[C]$HOME/.local/numonic\f[R].
+Finally, it will create or replace the following files in the \f[C]$HOME\f[R] directory:
+.IP \[bu] 2
+\&.pam_environment
+.IP \[bu] 2
+\&.profile
+.IP \[bu] 2
+\&.bash_profile
+.IP \[bu] 2
+\&.bashrc
+.IP \[bu] 2
+\&.zprofile
+.IP \[bu] 2
+\&.zshrc
+.PP
+If you have existing customizations within these startup environment files, they will need to be re-added to the user
+bashrc and/or zshrc that numonic loads after it is initialized.
+This may seem invasive (and it is), but experience has taught us that the vast majority of bugs we experience is
+correlated to changes that developers (or other installers) make to these files with no regard for order.
+In numonic, any user customizations will always be loaded \f[I]AFTER\f[R] numonic is fully initialized.
+This ensures that these customizations always take precedence.
+It also will survive upgrades to numonic.
+.PP
+Use the \f[B]edit-bashrc\f[R](1) and \f[B]edit-zshrc\f[R](1) commands to add these customizations.
+.PP
+We do create a backup (https://numonic.sh/commands/backup) of these files every time that numonic is installed or
+upgraded.
+One can also uninstall numonic and restore their environment back to the way it was before numonic was even introduced
+via an \f[B]uninstall-numonic\f[R](1) command.
+.SS PREREQUISITES
+.PP
+The latest available versions of the following prerequisites will be installed for your distribution by default.
+If you wish to skip automatic installation, such as on systems where sudo permissions are not available, you can pass
+the \f[B]--no-dependencies\f[R] flag to the bootstrap / installer.
+Note that doing this will require suitable versions of these prerequisites exist.
+The existence of the dependencies is verified but not versions.
+This is done to ensure the greatest compatibility possible within a wide range of secure environments, such as virtual
+desktops without internet access.
+.PP
+The install (install-aws, install-gcloud, install-azure, etc) scripts may have their own dependencies and will require
+internet access.
+Please consult the install (https://numonic.sh/commands/install) documentation for more information.
+.SS REQUIRED PREREQUISITES
+.PP
+The following prerequisites are required (and verified) for installation to succeed.
+.IP \[bu] 2
+curl
+.IP \[bu] 2
+find (findutils)
+.IP \[bu] 2
+grep
+.IP \[bu] 2
+jq >= 1.4
+.IP \[bu] 2
+man (man-db)
+.IP \[bu] 2
+unzip
+.IP \[bu] 2
+a nerd font (https://www.nerdfonts.com) for your terminal program of choice \f[I]OR\f[R] use our
+theme (https://numonic.sh/commands/theme)
+.SS OPTIONAL PREREQUISITES
+.PP
+The following optional prerequisites are required for all features, namely external multi-factor authentication (MFA)
+devices and git-* commands.
+These commands are not verified if \f[B]--no-dependencies\f[R] is set during installation.
+.IP \[bu] 2
+git >= 2.0
+.IP \[bu] 2
+gpg >= 2.0
+.SS OPERATING SYSTEMS
+.PP
+While numonic \f[I]should\f[R] run on macOS High Sierra or greater and all Linux distributions with either apt, dnf, or
+yum, we only validate against a few of the more recent versions of popular ones.
+.PP
+.TS
+tab(@);
+l l.
+T{
+Name
+T}@T{
+Version
+T}
+_
+T{
+macOS
+T}@T{
+10.15 (Catalina) and 11.0 (Big Sur)
+T}
+T{
+windows
+T}@T{
+10 and 11 (WSL 2)
+T}
+T{
+ubuntu
+T}@T{
+20.04 (Focal) and 20.10 (Impish)
+T}
+T{
+fedora
+T}@T{
+34 and 35
+T}
+T{
+debian
+T}@T{
+10 (Buster) and 11 (Bullseye)
+T}
+T{
+centos
+T}@T{
+8
+T}
+T{
+amazon
+T}@T{
+Amazon Linux 2
+T}
+.TE
+.RS
+.PP
+NOTE: We only test and support distributions that support both amd64 and arm64 (aarch64) as we have many customers
+operating on both.
+Not all capabilities are tested.
+If you discover any bugs or wish to add your favorite distro to the validated list, please create an
+issue (https://github.com/automotiveMastermind/numonic/issues/new/choose).
+.RE
+.SH OPTIONS
+.SS ARGUMENTS
+.SS <shell>, -s <shell> --shell=<shell>
+.PP
+the name of the shell to use or install, which must be one of \[aq]sh\[aq], \[aq]bash\[aq], or \[aq]zsh\[aq]
+.SS FLAGS
+.SS -d, --debug
+.PP
+print the commands as they are executed (set -x)
+.SS -h, --help
+.PP
+print this help information
+.SS -nd, --no-dependencies
+.PP
+do not install any required dependencies as part of the installation of numonic if this is set, then the required
+dependencies will be verified and the installation will fail if any dependency is unavailable
+.SS -q, --quiet
+.PP
+suppress any output to stdout (any errors will still be printed)
+.SH SEE ALSO
+.PP
+\f[B]update-numonic\f[R](1)
+.SH AUTHORS
+Deavon M. McCaffery

@@ -12,7 +12,7 @@ userenv-prepend-path - prepends a path to the beginning of the **PATH** variable
 
 # DESCRIPTION
 
-This command will prepend the specified value to the **PATH** variable witihn the user specific environment file,
+This command will prepend the specified value to the **PATH** variable within the user specific environment file,
 typically located at $HOME/.pam_environment. The separator will always be a colon (:).
 
 # OPTIONS

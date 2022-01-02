@@ -25,7 +25,7 @@ coming soon. We will continue to evaluate `podman-machine` as a native solution.
 
 ## WSL
 
-WSL 2 does not currently support systemd, so the podman socket is initialised as a background process. In addition, the
+WSL 2 does not currently support systemd, so the podman socket is initialized as a background process. In addition, the
 cgroup manager must be set to cgroupfs and the events logger is set to file.
 
 # OPTIONS

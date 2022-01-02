@@ -1,0 +1,87 @@
+#! /usr/bin/env sh
+
+set -e
+
+__numonic_install_tflint() {
+	while :; do
+		case $1 in
+			-d|--debug)
+				debug=1
+				;;
+			-f|--force)
+				if [ -f "${NUMONIC_BIN}"/tflint ]; then
+					rm -f "${NUMONIC_BIN}"/tflint
+				fi
+
+				if command -v tflint 1>/dev/null 2>&1; then
+					print-fail "install-tflint: tflint is already on the path at: $(command -v tflint)" \
+						'This version was not installed using numonic.' \
+						'Please remove using the package manager that was used to install it.'
+					return 1
+				fi
+				;;
+			-h|--help)
+				man install-tflint
+				return 0
+				;;
+			-q|--quiet)
+				quiet=1
+				;;
+			?*)
+				print-fail "install-tflint: too many arguments, argument: ${1} is unexpected"
+				man install-tflint | cat 1>&2
+				return 1
+				;;
+			*)
+				break
+				;;
+		esac
+		shift
+	done
+
+	if command -v tflint 1>/dev/null 2>&1; then
+		print-warn "install-tflint: tflint is already on the path at: $(command -v tflint)" \
+			'to reinstall, use the --force flag'
+		return 1
+	fi
+
+	(
+		if [ -n "${quiet:-}" ]; then
+			exec 1>/dev/null
+		fi
+
+		if [ -n "${debug:-}" ]; then
+			set -x
+		fi
+
+		platform=$(uname | tr '[:upper:]' '[:lower:]')
+		architecture=$(uname -m | tr '[:upper:]' '[:lower:]')
+
+		if [ "${architecture}" = "x86_64" ]; then
+			architecture="amd64"
+		elif [ "${architecture}" = "aarch64" ]; then
+			architecture="arm64"
+		fi
+
+		url="https://github.com/terraform-linters/tflint/releases/latest/download/tflint_${platform}_${architecture}.zip"
+
+		print-success '' \
+			'INSTALL TFLINT' \
+			"platform: ${platform}\${architecture}" \
+			"url     : ${url}" \
+			"output  : ${NUMONIC_BIN}/tflint" \
+		''
+
+		temp=$(mktemp)
+
+		print-success "install-tflint: downloading tflint..."
+
+		download-safe "${url}" "${temp}"
+		unzip "${temp}" -d "${NUMONIC_BIN}" 1>/dev/null
+		chmod +x "${NUMONIC_BIN}"/tflint
+
+		rm -f "${temp}"
+	)
+}
+
+__numonic_install_tflint "$@"

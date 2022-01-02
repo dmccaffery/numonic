@@ -1,13 +1,8 @@
 #! /usr/bin/env sh
 
-if command -v pyenv 1>/dev/null 2>&1; then
-  eval "$(pyenv init -)"
-  return
-fi
+python_cmd=$(command -v python3 || command -v python || printf '')
 
-PYTHON=$(command -v python3 || command -v python)
-
-if [ -n "${PYTHON}" ]; then
-	USER_BASE_PATH=$(${PYTHON} -m site --user-base)
+if [ -n "${python_cmd}" ]; then
+	USER_BASE_PATH=$(${python_cmd} -m site --user-base || printf '')
 	export PATH="${USER_BASE_PATH}/bin:${PATH}"
 fi

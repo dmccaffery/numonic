@@ -1,0 +1,99 @@
+#! /usr/bin/env sh
+
+set -e
+
+__numonic_uninstall_shell() {
+		if [ ! -f "${backup_dir}/.shell" ]; then
+			print-warn '' \
+				"uninstall-numonic: default shell not found at: ${backup_dir}/.shell" \
+				"the current shell ${SHELL} will remain" \
+				"this may not be the original shell before numonic was installed"
+
+			return 1
+		fi
+
+		# restore the shell
+		old_shell=$(cat "${backup_dir}/.shell")
+
+		if command -v "${old_shell}" 1>/dev/null 2>&1; then
+			old_shell=$(command -v "${old_shell}")
+
+			if [ "${old_shell}" != "${SHELL}" ]; then
+				print-success "uninstall-numonic: restoring default shell to: ${old_shell}"
+				chsh -s "${old_shell}"
+			fi
+		fi
+}
+
+__numonic_uninstall() {
+	NUMONIC_LOCAL=${NUMONIC_LOCAL:-${HOME}/.local}
+	backup_dir=${NUMONIC_LOCAL}/backup/numonic/initial
+
+	while :; do
+		case $1 in
+			--debug)
+				debug=1
+				;;
+			-f|--force)
+				force=1
+				;;
+			-h|--help)
+				man uninstall-numonic
+				return 0
+				;;
+			?*)
+				print-fail "uninstall-numonic: too many arguments, argument: ${1} is unexpected"
+				man uninstall-numonic | cat 1>&2
+				return 1
+				;;
+			*)
+				break
+				;;
+		esac
+		shift
+	done
+
+	(
+		if [ -n "${quiet:-}" ]; then
+			exec 1>/dev/null
+		fi
+
+		if [ -n "${debug:-}" ]; then
+			set -x
+		fi
+
+		if [ -z "${force:-}" ] && [ ! -d "${backup_dir}" ]; then
+			print-fail '' \
+				"uninstall-numonic: initial backup not found at: ${backup_dir}" \
+				'we cannot guarantee that the state of the shell environment will be returned to the original state' \
+				'to reset the environment, use the --force flag' \
+			''
+			return 1
+		fi
+
+		for item in pam_environment profile bash_profile bashrc zprofile zshrc; do
+			if [ -f "${HOME}/.${item}" ]; then
+				print-warn "uninstall-numonic: removing ${item}"
+				rm -rf "${HOME}"/.${item} || true
+			fi
+		done
+
+		if [ -d "${NUMONIC_HOME:-}" ]; then
+			print-warn "uninstall-numonic: removing ${NUMONIC_HOME}"
+			rm -rf "${NUMONIC_HOME:-}" || true
+		fi
+
+		if [ ! -d "${backup_dir}" ]; then
+			print-warn '' \
+				"uninstall-numonic: initial backup not found at: ${backup_dir}" \
+				"the shell environment has been reset!"
+
+			return 1
+		else
+			print-success "uninstall-numonic: restoring ${backup_dir}"
+			cp -pRP "${backup_dir}/" "${HOME}"
+		fi
+	)
+}
+
+__numonic_uninstall "$@"

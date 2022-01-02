@@ -1,0 +1,99 @@
+name: containers
+
+on:
+  pull_request:
+    branches:
+      - main
+  release:
+    types:
+      - created
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    name: publish-containers
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        shell:
+          - bash
+          - zsh
+        distro:
+          - ubuntu:20.04
+          - ubuntu:21.10
+          - ubuntu:latest
+          - debian:10
+          - debian:11
+          - debian:latest
+          - fedora:34
+          - fedora:35
+          - fedora:latest
+          - centos:8
+          - centos:latest
+          - amazonlinux:2
+          - amazonlinux:latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: setup-qemu
+        uses: docker/setup-qemu-action@v1
+        with:
+          platforms: linux/amd64,linux/arm64
+
+      - name: setup-buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: split-distro
+        id: distro
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const parts = "${{ matrix.distro }}".split(':');
+            const name = parts[0];
+            const version = parts[1];
+
+            core.setOutput('name', name);
+            core.setOutput('version', version);
+            core.setOutput('tag', `${name}-${version}`);
+
+      - name: generate-metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ github.repository_owner }}/numonic
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}
+            type=semver,pattern={{major}}.{{minor}}
+          flavor: |
+            latest=${{ matrix.distro == "ubuntu:latest" && matrix.shell == "zsh" }}
+            suffix={{ steps.distro.outputs.tag }}-${{ matrix.shell }},onlatest=false
+
+      - name: login-ghcr
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: build-and-push
+        id: build
+        uses: docker/build-push-action@v2
+        with:
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha
+          build-args: |
+            DISTRO=${{ steps.distro.outputs.name }}
+            VERSION=${{ steps.distro.outputs.version }}
+          context: .
+          file: containers/Containerfile

@@ -55,24 +55,35 @@ functionality, including:
 
 ## Prerequisites
 
-The following prerequisites are required for most numonic commands to function:
-
-* curl >= 6
-* git >= 2.0
-* gpg / gnupg >= 2.0
-* homebrew (mac-only)
-* jq - >= 1.4
-* a [nerd font](https://www.nerdfonts.com) for your terminal program of choice *OR* use our
-  [theme](https://numonic.sh/commands/theme)
-
-The latest available versions of these will be installed for your distribution by default. If you wish to skip automatic
-installation, such as on systems where sudo permissions are not available, you can pass the `--no-dependencies` flag to
-the bootstrap / installer. Note that doing this will require suitable versions of these prerequisites exist. The
-existence of the dependencies is verified but not versions. This is done to ensure the greatest compatibility possible
-within a wide range of secure environments, such as virtual deskops without internet access.
+The latest available versions of the following prequisites will be installed for your distribution by default. If you
+wish to skip automatic installation, such as on systems where sudo permissions are not available, you can pass the
+`--no-dependencies` flag to the bootstrap / installer. Note that doing this will require suitable versions of these
+prerequisites exist. The existence of the dependencies is verified but not versions. This is done to ensure the greatest
+compatibility possible within a wide range of secure environments, such as virtual deskops without internet access.
 
 The install (install-aws, install-gcloud, install-azure, etc) scripts may have their own dependencies and will require
 internet access. Please consult the [install](https://numonic.sh/commands/install) documentation for more information.
+
+### Required Prerequisites
+
+The following prerequisites are required (and verified) for installation to succeed.
+
+* curl >= 6
+* find (findutils)
+* homebrew (mac-only)
+* jq - >= 1.4
+* man (man-db)
+* unzip
+* a [nerd font](https://www.nerdfonts.com) for your terminal program of choice *OR* use our
+  [theme](https://numonic.sh/commands/theme)
+
+### Optional Prerequisites
+
+The following optional prerequisites are required for all features, namely external multi-factor authentication (MFA)
+devices and git-* commands. These commands are not verified if **--no-dependencies** is set during installation.
+
+* git >= 2.0
+* gpg >= 2.0
 
 ### Operating Systems
 
@@ -102,10 +113,10 @@ Install numonic in one step (choose one of the following options):
 
 ``` sh
 # install and use zsh (the default)
-curl --fail --silent --show-error --location https://numonic.sh/bootstrap.sh | sh -s
+curl --fail --silent --show-error --location https://numonic.sh/bootstrap | sh -s
 
 # install and use bash
-curl --fail --silent --show-error --location https://numonic.sh/bootstrap.sh | sh -s -- bash
+curl --fail --silent --show-error --location https://numonic.sh/bootstrap | sh -s -- bash
 ```
 
 > NOTE: We believe in transparency and clarity of commands, hence the expanded form for the options above. The `-s` flag
@@ -146,7 +157,7 @@ Although it is **NOT** recommended (for security reasons), you can install speci
 
 ``` sh
 # install and use bash with a specific version
-curl --fail --silent --show-error --location https://numonic.sh/bootstrap.sh | sh -s -- v1 bash
+curl --fail --silent --show-error --location https://numonic.sh/bootstrap | sh -s -- v1 bash
 ```
 
 ### Updating Numonic
@@ -193,4 +204,4 @@ cloud platform sdks, will remain, however.
 [stable-version-image]: https://img.shields.io/github/v/release/automotivemastermind/numonic?label=stable&sort=semver
 [next-version-image]: https://img.shields.io/github/v/tag/automotivemastermind/numonic?color=orange&include_prereleases&label=next&sort=semver
 
-[new-issue-url]: https://github.com/automotivemastermind/numonic/issues/new
+[new-issue-url]: https://github.com/automotiveMastermind/numonic/issues/new/choose

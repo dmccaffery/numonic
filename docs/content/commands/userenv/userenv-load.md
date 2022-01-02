@@ -12,7 +12,7 @@ userenv-load - loads the user specific environment file within the current shell
 
 # DESCRIPTION
 
-This command will load all variables from the user specific environment file, typically localled at
+This command will load all variables from the user specific environment file, typically located at
 $HOME/.pam_environment. Once loaded, the variables will be available within the current shell.
 
 # OPTIONS

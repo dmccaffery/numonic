@@ -37,12 +37,12 @@ __numonic_theme_terminal() {
 	done
 
 	(
-		if [ -n "${debug:-}" ]; then
-			set -x
-		fi
-
 		if [ -n "${quiet:-}" ]; then
 			exec 1>/dev/null
+		fi
+
+		if [ -n "${debug:-}" ]; then
+			set -x
 		fi
 
 		theme="${theme-terminal:-numonic-dark}"

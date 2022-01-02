@@ -57,5 +57,5 @@ __numonic_userenv_load() {
 	fi
 
 	eval "${variables}" 1>/dev/null
-    eval "$(export PATH="${PATH}")"
+	eval "$(export PATH="${PATH}")"
 }

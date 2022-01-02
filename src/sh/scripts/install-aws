@@ -41,7 +41,6 @@ __numonic_install_aws() {
 	if command -v aws 1>/dev/null 2>&1; then
 		print-warn "install-aws: aws is already on the path at: $(command -v aws)" \
 			'to reinstall, use the --force flag'
-		man install-aws | cat 1>&2
 		return 1
 	fi
 
@@ -72,8 +71,19 @@ __numonic_install_aws() {
 				complete -C 'aws_completer' aws
 			EOF
 
+			chmod +x "${install_dir}"/aws.completion.inc
+
 			ln -fs "${install_dir}"/aws.completion.inc "${BASH_COMPLETION_DIR}"/aws.inc
-			ln -fs "${install_dir}"/aws.completion.inc "${ZSH_COMPLETION_DIR}"/_aws
+			ln -fs "${install_dir}"/aws.completion.inc "${ZSH_COMPLETION_DIR}"/aws.sh
+
+			cat <<- 'EOT' > "${ZSH_COMPLETION_DIR}"/_aws
+			#compdef aws
+			_aws() {
+			  [ -f "${ZSH_COMPLETION_DIR}"/aws.sh ] && source "${ZSH_COMPLETION_DIR}"/aws.sh
+			}
+			EOT
+
+			chmod +x "${ZSH_COMPLETION_DIR}"/_aws
 		fi
 	)
 

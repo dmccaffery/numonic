@@ -68,5 +68,5 @@ __numonic_userenv_append_path() {
 	PATH=$(userenv get-path)
 
 	# export the path
-    eval "$(export PATH="${PATH}")"
+	eval "$(export PATH="${PATH}")"
 }

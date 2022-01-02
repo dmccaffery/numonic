@@ -14,6 +14,9 @@ __numonic_git_commit_mark() {
 				man git-commit-mark
 				return 0
 				;;
+			-q|--quiet)
+				quiet=1
+				;;
 			-m|--message)
 				message="[MARK] ${2}"
 				shift
@@ -37,11 +40,25 @@ __numonic_git_commit_mark() {
 	done
 
 	(
+		if [ -n "${quiet:-}" ]; then
+			exec 1>/dev/null
+		fi
+
 		if [ -n "${debug:-}" ]; then
 			set -x
 		fi
 
-		git commit --allow-empty --message "${message}"
+		if git stash --only-untracked --message='[MARK]' 2>/dev/null; then
+			stashed=1
+		fi
+
+		git reset
+		git commit --allow-empty --message "${message}" --signoff
+		git add --all
+
+		if [ -n "${stashed:-}" ]; then
+			git stash pop
+		fi
 	)
 }
 

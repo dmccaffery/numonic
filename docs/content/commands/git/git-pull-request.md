@@ -8,28 +8,41 @@ git-pull-request - prepares a new commit
 
 # SYNOPSIS
 
-**git** **pull-request** <*branch*> [<*upstream*>] [**-p**[<*origin*>] | [**--push**[**=**<*origin*>]] [**-dr** | **--dry-run**] [**-d** | **--debug**] [**-h** | **--help**]
+**git** **pull-request** <*branch*> [<*upstream*>] [**-p** [<*origin*>] | [**--push**[**=**<*origin*>]] [**-dr** | **--dry-run**] [**-d** | **--debug**] [**-h** | **--help**] [**-i** | **--interactive**]
 
-**git** **pull-request** **-b** <*branch*> [**-u** <*upstream*>] [**-p** [<*origin*>]]
+**git** **pull-request** **-b** <*branch*> [**-u** <*upstream*>] [**-p** [<*origin*>]] [**-dr** | **--dry-run**] [**-d** | **--debug**] [**-h** | **--help**] [**-i** | **--interactive**]
 
-**git** **pull-request** **--branch=**<*branch*> [**--upstream=**<*upstream*>] [**--push**[**=**<*origin*>]]
+**git** **pull-request** **--branch=**<*branch*> [**--upstream=**<*upstream*>] [**--push**[**=**<*origin*>]] [**-dr** | **--dry-run**] [**-d** | **--debug**] [**-h** | **--help**] [**-i** | **--interactive**]
 
 # DESCRIPTION
 
 This command creates a new commit on the current HEAD branch and performs a rebase of the specified <*branch*> on the
 specified <*remote*>, which should bring the current branch up to date for a linear, fast-forward only pull request.
 
+This command is essentially equivalent to the following:
+
+```sh
+git add --all
+git commit --edit
+git fetch --all
+git rebase --autosquash --autostash <remote>/<branch> --empty=drop --signoff
+git push
+```
+
+If the **--interactive** flag is set, then the rebase will be interactive and the caller will need to push the commits
+to the origin once the rebase is complete.
+
 # OPTIONS
 
 ## \<branch\>, -b \<branch\>, --branch=\<branch\>
 
 name of the branch used to rebase the current branch from the origin
-DEFAULT: main | master
+DEFAULT: develop | next | main | master (the first one that exists)
 
 ## \<upstream\>, -u \<upstream\>, --upstream=\<upstream\>
 
 name of the upstream used to rebase the current branch
-DEFAULT: upstream | origin
+DEFAULT: upstream | origin (the first one that exists)
 
 ## -p, -p \<origin\>, --push, --push=\<origin\>
 
@@ -63,9 +76,9 @@ remote, then **origin** will be used. This is intended to support contributions 
 branches. We recommend using a feature branch even on forks as the git extensions support updating the origin from the
 remote for the main branch.
 
-If the **--push** flag is specified without specifing a remote, then **origin** will be used. By default, this command
+If the **--push** flag is specified without specifying a remote, then **origin** will be used. By default, this command
 will not push the newly minted commit to the origin. The use of the **--push** flag is required to enable this
-behaviour.
+behavior.
 
 # EXAMPLES
 

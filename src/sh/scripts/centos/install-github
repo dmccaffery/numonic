@@ -2,7 +2,7 @@
 
 __numonic_install_github() {
 	if command -v gh 1>/dev/null 2>&1; then
-		return
+		return 0
 	fi
 
 	print-success 'installing github cli...'

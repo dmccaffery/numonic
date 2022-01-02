@@ -49,7 +49,6 @@ __numonic_install_gcloud() {
 	if command -v gcloud 1>/dev/null 2>&1; then
 		print-warn "install-gcloud: gcloud is already on the path at: $(command -v gcloud)" \
 			'to reinstall, use the --force flag'
-		man install-gcloud | cat 1>&2
 		return 1
 	fi
 
@@ -79,7 +78,7 @@ __numonic_install_gcloud() {
 			--directory="${install_dir}" 1>/dev/null
 
 		# remove the temp directory
-		rm --recursive --force "${temp}"
+		rm -rf "${temp}"
 
 		"${install_dir}"/install.sh \
 			--command-completion false \
@@ -101,7 +100,16 @@ __numonic_install_gcloud() {
 		if [ -f "${install_dir}"/completion.zsh.inc ]; then
 			ln -fs \
 				"${install_dir}"/completion.zsh.inc \
-				"${ZSH_COMPLETION_DIR}"/_gcloud
+				"${ZSH_COMPLETION_DIR}"/gcloud.sh
+
+			cat <<- 'EOT' > "${ZSH_COMPLETION_DIR}"/_gcloud
+			#compdef gcloud
+			_gcloud() {
+			  [ -f "${ZSH_COMPLETION_DIR}"/gcloud.sh ] && source "${ZSH_COMPLETION_DIR}"/gcloud.sh
+			}
+			EOT
+
+			chmod +x "${ZSH_COMPLETION_DIR}"/_gcloud
 		fi
 	)
 

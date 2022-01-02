@@ -39,12 +39,11 @@ fi
 fpath=("${ZSH_COMPLETION_DIR}" "${fpath[@]}")
 
 # load completion
-autoload -U +X compinit
-compinit
+autoload -U +X bashcompinit && bashcompinit
 
-# support bash completion
-autoload -U +X bashcompinit
-bashcompinit
+if ! (( $+functions[compdef] )); then
+    autoload -U +X compinit && compinit
+fi
 
 # evaluate eval scripts
 for eval_script in "${NUMONIC_HOME}"/zsh/scripts/eval/*; do

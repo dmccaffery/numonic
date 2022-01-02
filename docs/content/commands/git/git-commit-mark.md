@@ -19,6 +19,19 @@ git-commit-mark - create a new empty marker commit
 This command creates a new empty marker commit with a prefix of **\[MARK\]** for the subject. This is useful for marking
 the HEAD of a rebase to easily identify the target commit for a future squash. A marked commit is only retained locally.
 
+This command is essentially equivalent to:
+
+```sh
+git stash --only-untracked --message='[MARK]'
+git reset
+git commit --message='[MARK]' --allow-empty --squash
+git add --all
+git stash pop
+```
+
+The result is that an empty commit will be created and any staged/un-staged files will be returned to the current state
+immediately prior to the operation.
+
 # OPTIONS
 
 ## \<message\>, -m \<message\>, --message=\<message\>

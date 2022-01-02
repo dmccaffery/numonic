@@ -1,0 +1,8 @@
+#! /usr/bin/env sh
+
+set -e
+
+install-brew-formulae \
+	--name=aws-sam-cli \
+	--tap=aws/tap \
+	"$@"

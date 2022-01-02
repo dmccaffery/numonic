@@ -4,7 +4,7 @@
 if ! command -v gpgconf 1>/dev/null 2>&1; then
 
 	# move on immediately
-	return
+	return 0
 fi
 
 SSH_AUTH_SOCK="$(gpgconf --list-dirs 2>/dev/null | grep ^agent-ssh-socket)"
@@ -15,7 +15,7 @@ export SSH_AUTH_SOCK
 if [ -z "${SSH_CLIENT:-}" ]; then
 
 	# get the tty
-	GPG_TTY="$(tty)"
+	GPG_TTY="$(tty || printf '')"
 	export GPG_TTY
 
 	# launch gpg-agent using the expected tty and sock

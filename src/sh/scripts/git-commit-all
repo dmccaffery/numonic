@@ -12,8 +12,18 @@ __numonic_git_commit_all() {
 				man git-commit-all
 				return 0
 				;;
+			-q|--quiet)
+				quiet=1
+				;;
+			-m|--message)
+				message="${2}"
+				shift
+				;;
+			--message=*)
+				message="${1#*=}"
+				;;
 			*?)
-				print-fail "git commit-all: unknown argument ${1}"
+				print-fail "git commit-all: too many arguments, argument: ${1} is unexpected"
 				man git-commit-all | cat 1>&2
 				return 1
 				;;
@@ -24,12 +34,16 @@ __numonic_git_commit_all() {
 	done
 
 	(
+		if [ -n "${quiet:-}" ]; then
+			exec 1>/dev/null
+		fi
+
 		if [ -n "${debug:-}" ]; then
 			set -x
 		fi
 
 		git add --all
-		git commit --edit
+		git commit --edit --signoff --message="${message:-}"
 	)
 }
 

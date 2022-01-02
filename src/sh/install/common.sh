@@ -5,6 +5,7 @@ set -e
 __numonic_configure_gpg() {
 	if ! command -v gpgconf 1>/dev/null 2>&1; then
 		print-warn "numonic: skipping gpg configuration..."
+		return 0
 	fi
 
 	print-success "numonic: configuring gpg..."

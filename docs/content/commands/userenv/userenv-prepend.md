@@ -31,7 +31,7 @@ the value of the environment variable to prepend
 
 ## --separator \<separator\>, --separator=\<separator\>
 
-the separator to use when prepending the value
+the separator to use when pre-pending the value
 
 ## --help
 
@@ -54,7 +54,8 @@ prepend a variable named abc with the value of 123 using a comma as a separator
 # DEFAULTS
 
 If the separator is not specified, the default will be the colon (:) character. For example if a value of 123 is
-prepended to an existing variable called my_var with a value of abc, then the result will be: my_var=abc:123 by default.
+pre-pended to an existing variable called my_var with a value of abc, then the result will be: my_var=abc:123 by
+default.
 
 # SEE ALSO
 

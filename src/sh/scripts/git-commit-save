@@ -42,7 +42,7 @@ __numonic_git_commit_save() {
 		fi
 
 		git add --all
-		git commit --all --message "${message}"
+		git commit --signoff --message "${message}"
 	)
 }
 

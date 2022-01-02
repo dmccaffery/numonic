@@ -89,11 +89,11 @@ __numonic_git_done() {
 		# delete merged branches
 		git-delete-merged --branch="${branch}"
 
-		# delete branches that don't exist on the remote
-		git-delete-gone --remote="${remote}"
-
 		# prune the remote
 		git-remote-prune --remote="${remote}"
+
+		# delete branches that don't exist on the remote
+		git-delete-gone --remote="${remote}"
 	)
 }
 

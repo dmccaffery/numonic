@@ -1,13 +1,13 @@
 name: release
 
-on:
-  push:
-    branches:
-      - main
+on: workflow_dispatch
 
 concurrency:
   group: release
   cancel-in-progress: false
+
+permissions:
+  contents: write
 
 jobs:
   release:
@@ -32,6 +32,9 @@ jobs:
           entrypoint: /bin/sh
           args: -c './hack/docs-manpages.sh'
 
+      - name: build-docs-site
+        run: ./hack/docs-site.sh
+
       - name: semantic-release-prerequisites
         run: |
           npm install --no-package-lock --no-save \
@@ -43,11 +46,11 @@ jobs:
             @semantic-release/git
 
       - name: semantic-release-dry-run
-        run: npx semantic-release --ci --dry-run
         if: ${{ github.event.repository.fork }}
+        run: npx semantic-release --ci --dry-run
 
       - name: semantic-release
-        run: npx semantic-release --ci
         if: ${{ !github.event.repository.fork }}
+        run: npx semantic-release --ci
         env:
-          GITHUB_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,100 @@
+#! /usr/bin/env sh
+
+set -e
+
+__numonic_install_containerd() {
+	while :; do
+		case $1 in
+			-d|--debug)
+				debug=1
+				;;
+			-f|--force)
+				if [ -f "${NUMONIC_BIN}"/nerdctl ]; then
+					rm -f "${NUMONIC_BIN}"/nerdctl
+				fi
+
+				if command -v nerdctl 1>/dev/null 2>&1; then
+					print-fail "install-containerd: nerdctl is already on the path at: $(command -v nerdctl)" \
+						'This version was not installed using numonic.' \
+						'Please remove using the package manager that was used to install it.'
+					return 1
+				fi
+				;;
+			-h|--help)
+				man install-containerd
+				return 0
+				;;
+			-q|--quiet)
+				quiet=1
+				;;
+			?*)
+				print-fail "install-containerd: too many arguments, argument: ${1} is unexpected"
+				man install-containerd | cat 1>&2
+				return 1
+				;;
+			*)
+				break
+				;;
+		esac
+		shift
+	done
+
+	if command -v nerdctl 1>/dev/null 2>&1; then
+		print-warn "install-containerd: nerdctl is already on the path at: $(command -v nerdctl)" \
+			'to reinstall, use the --force flag'
+		return 1
+	fi
+
+	(
+		if [ -n "${quiet:-}" ]; then
+			exec 1>/dev/null
+		fi
+
+		if [ -n "${debug:-}" ]; then
+			set -x
+		fi
+
+		install-brew-formulae \
+			--name=containerd \
+			--brew=qemu \
+			--brew=lima
+
+		if [ ! -d "${HOME}"/.lima ]; then
+			mkdir -p "${HOME}"/.lima
+		fi
+
+		if limactl list 2>&1 | grep containerd 1>/dev/null 2>&1; then
+			print-success 'install-containerd: stopping existing lima guest...'
+			limactl stop containerd --force
+			limactl delete containerd --force
+		fi
+
+		print-success 'install-containerd: installing / updating lima guest...'
+		limactl prune 1>/dev/null 2>&1 || true
+
+		# shellcheck disable=SC2016
+		print-warn '' \
+			'install-containerd: you will be prompted to modify the configuration -- we recommend verifying the cpu and' \
+			'memory limits with at least 1GiB of memory per cpu.' \
+			'' \
+			'By default, only $HOME and /tmp/lima is bind mountable. The $HOME path is configured to be read-only.' 2>&1
+
+		limactl start "${NUMONIC_HOME}"/sh/scripts/darwin/lima/containerd.yaml
+
+		# setup the alias to using nerdctl within the container
+		cat <<- 'EOF' > "${NUMONIC_BIN}/nerdctl"
+			#! /usr/bin/env sh
+			limactl shell containerd nerdctl "$@"
+		EOF
+		chmod +x "${NUMONIC_BIN}"/nerdctl
+		print-success '' 'install-containerd: containerd is now ready.'
+
+		# shellcheck disable=SC2016
+		print-warn '' \
+			'install-containerd: start a new shell to enable tab completion' \
+			'exec $SHELL -l' \
+		''
+	)
+}
+
+__numonic_install_containerd "$@"

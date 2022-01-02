@@ -75,7 +75,7 @@ __numonic_github_release() {
 			"org        : ${org}" \
 			"repo       : ${repo}" \
 			"prerelease : ${pre}" \
-			"filter : ${filter}" \
+			"filter     : ${filter}" \
 		''
 
 		return 0

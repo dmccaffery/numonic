@@ -1,5 +1,78 @@
 .TH "NUMONIC-INSTALL" "7" "November 18, 2021" "Numonic v1.0.0" "Numonic Manual"
 .nh \" Turn off hyphenation by default.
-
+.SH NAME
+.PP
+numonic-install - an explanation of the commands related to the installation of numonic itself as well as common tools
+used in modern development environments
+.SH SYNOPSIS
+.PP
+numonic-install
+.SH DESCRIPTION
+.PP
+The main point of numonic is to make the lives of modern developers and system administrators easier.
+To that end, numonic includes commands to install common tools and sdks used in many stacks.
+.SH AVAILABLE COMMANDS
+.SS TOOLS AND SDKS
+.PP
+The following cloud platform sdks and cli tools are available for install:
+.IP \[bu] 2
+\f[B]install-aws\f[R](1)
+.IP \[bu] 2
+\f[B]install-azure\f[R](1)
+.IP \[bu] 2
+\f[B]install-gcloud\f[R](1)
+.PP
+The following language runtimes and cli tools are available for install:
+.IP \[bu] 2
+\f[B]install-dotnet\f[R](1)
+.IP \[bu] 2
+\f[B]install-golang\f[R](1)
+.IP \[bu] 2
+\f[B]install-nvm\f[R](1)
+.PP
+The following Open Container Initiative (OCI) tools are available for install:
+.IP \[bu] 2
+\f[B]install-containerd\f[R](1)
+.IP \[bu] 2
+\f[B]install-kind\f[R](1)
+.IP \[bu] 2
+\f[B]install-podman\f[R](1)
+.PP
+The following lint tools are available for install:
+.IP \[bu] 2
+\f[B]install-checkov\f[R](1)
+.IP \[bu] 2
+\f[B]install-detect-secrets\f[R](1)
+.IP \[bu] 2
+\f[B]install-tflint\f[R](1)
+.IP \[bu] 2
+\f[B]install-tfsec\f[R](1)
+.PP
+The following developer tools are available for install:
+.IP \[bu] 2
+\f[B]install-github\f[R](1)
+.SS NUMONIC
+.PP
+In addition to the above third-party tools, there are several commands used to manage the installation of numonic
+itself, including:
+.IP \[bu] 2
+\f[B]install-numonic\f[R](1)
+.IP \[bu] 2
+\f[B]update-numonic\f[R](1)
+.IP \[bu] 2
+\f[B]uninstall-numonic\f[R](1)
+.SS INTERNALS (MACOS)
+.PP
+The following commands are used on the macOS platform, which relies on homebrew for the vast majority of third-party
+tools:
+.IP \[bu] 2
+\f[B]install-brew-formulae\f[R](1)
+.SH SEE ALSO
+.PP
+\f[B]install-aws\f[R](1), \f[B]install-azure\f[R](1), \f[B]install-gcloud\f[R](1), \f[B]install-dotnet\f[R](1),
+\f[B]install-golang\f[R](1), \f[B]install-nvm\f[R](1), \f[B]install-containerd\f[R](1), \f[B]install-kind\f[R](1),
+\f[B]install-podman\f[R](1), \f[B]install-checkov\f[R](1), \f[B]install-detect-secrets\f[R](1),
+\f[B]install-tflint\f[R](1), \f[B]install-tfsec\f[R](1), \f[B]install-github\f[R](1), \f[B]install-numonic\f[R](1),
+\f[B]update-numonic\f[R](1), \f[B]uninstall-numonic\f[R](1), \f[B]install-brew-formulae\f[R](1)
 .SH AUTHORS
-Deavon M. McCaffery
+Deavon M. McCaffery; Not Committed Yet

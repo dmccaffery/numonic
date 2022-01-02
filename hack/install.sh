@@ -2,18 +2,18 @@
 
 set -e
 
-SHELL_NAME=${1:-'bash'}
+shell_name=${1:-'bash'}
 
-./install.sh "${SHELL_NAME}"
+./install.sh "${shell_name}"
 
-SHELL=${SHELL_NAME}
+SHELL=${shell_name}
 
-if [ -f /opt/homebrew/bin/"${SHELL_NAME}" ]; then
-	SHELL=/opt/homebrew/bin/${SHELL_NAME}
-elif [ -f /usr/local/bin/"${SHELL_NAME}" ]; then
-	SHELL=/usr/local/bin/${SHELL_NAME}
-elif ! command -v "${SHELL_NAME}" 1>/dev/null 2>&1; then
-	printf 'install: shell not on PATH: %s\n' "${SHELL_NAME}"
+if [ -f /opt/homebrew/bin/"${shell_name}" ]; then
+	SHELL=/opt/homebrew/bin/${shell_name}
+elif [ -f /usr/local/bin/"${shell_name}" ]; then
+	SHELL=/usr/local/bin/${shell_name}
+elif ! command -v "${shell_name}" 1>/dev/null 2>&1; then
+	printf 'install: shell not on PATH: %s\n' "${shell_name}"
 	exit 1
 fi
 

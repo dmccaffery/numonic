@@ -33,11 +33,11 @@ __numonic_install_dotnet() {
 				;;
 			-f|--force)
 				if [ -d "${install_dir}" ]; then
-					rm --recursive --force "${install_dir}"
+					rm -rf "${install_dir}"
 				fi
 
 				if [ -d "${HOME}/dotnet" ]; then
-					rm --recursive --force "${HOME}/dotnet"
+					rm -rf "${HOME}/dotnet"
 				fi
 
 				if command -v dotnet 1>/dev/null 2>&1; then
@@ -62,7 +62,6 @@ __numonic_install_dotnet() {
 	if command -v dotnet 1>/dev/null 2>&1; then
 		print-warn "install-dotnet: dotnet is already on the path at: $(command -v dotnet)" \
 			'to reinstall, use the --force flag'
-			man install-dotnet | cat 1>&2
 		return 1
 	fi
 
@@ -102,7 +101,7 @@ __numonic_install_dotnet() {
 		ln -fs "${install_dir}"/dotnet "${NUMONIC_BIN}"
 
 		if [ ! -d "${HOME}/.dotnet/tools" ]; then
-			mkdir "${HOME}/.dotnet/tools"
+			mkdir -p "${HOME}/.dotnet/tools"
 		fi
 
 		# setup completion
@@ -135,7 +134,16 @@ __numonic_install_dotnet() {
 			compctl -K __numonic_dotnet_zsh_complete dotnet
 		EOT
 
-		ln -fs "${install_dir}"/dotnet.zsh.inc "${ZSH_COMPLETION_DIR}"/_dotnet
+		ln -fs "${install_dir}"/dotnet.zsh.inc "${ZSH_COMPLETION_DIR}"/dotnet.sh
+
+		cat <<- 'EOT' > "${ZSH_COMPLETION_DIR}"/_dotnet
+			#compdef dotnet
+			_dotnet() {
+			  [ -f "${ZSH_COMPLETION_DIR}"/dotnet.sh ] && source "${ZSH_COMPLETION_DIR}"/dotnet.sh
+			}
+		EOT
+
+		chmod +x "${ZSH_COMPLETION_DIR}"/_dotnet
 	)
 
 	print-warn 'install-dotnet: building dotnet cache... (this may take a few minutes)'

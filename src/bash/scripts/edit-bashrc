@@ -32,6 +32,8 @@ __numonic_edit_bashrc() {
 			printf "%s\n\n" "#! /usr/bin/env bash" > "${bashrc_path}"
 		fi
 
+		echo "EDITOR: ${EDITOR}"
+
 		${EDITOR:-vi} "${bashrc_path}"
 	)
 }

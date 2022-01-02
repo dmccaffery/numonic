@@ -1,0 +1,19 @@
+#! /usr/bin/env sh
+
+JAVA_HOME="${JAVA_HOME:-${LOCAL_PREFIX:-}/opt/openjdk}"
+
+if [ ! -d "${JAVA_HOME:-}" ]; then
+	return 0
+fi
+
+export JAVA_HOME
+
+JAVA_BIN="${JAVA_HOME}"/bin
+
+if [ ! -d "${JAVA_BIN}" ]; then
+	return 0
+fi
+
+if [ "${PATH#*"${JAVA_BIN}"}" = "${PATH}" ]; then
+	export PATH="${JAVA_BIN}:${PATH}"
+fi

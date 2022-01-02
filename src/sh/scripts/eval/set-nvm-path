@@ -1,0 +1,20 @@
+#! /usr/bin/env sh
+
+if command -v nvm >/dev/null 2>&1; then
+	return 0
+fi
+
+if command -v brew 1>/dev/null 2>&1; then
+	nvm_dir=$(brew --prefix --installed nvm 2>/dev/null || printf '')
+fi
+
+nvm_dir=${nvm_dir:-${NUMONIC_SHARE}/nvm}
+
+if [ ! -d "${nvm_dir}" ]; then
+	nvm_dir="${HOME}"/.nvm
+fi
+
+if [ -f "${nvm_dir}"/nvm.sh ]; then
+	export NVM_DIR="${nvm_dir}"
+	. "${NVM_DIR}"/nvm.sh
+fi

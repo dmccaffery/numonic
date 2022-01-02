@@ -18,6 +18,12 @@ __numonic_git_pull_request() {
 			--debug)
 				debug=1
 				;;
+			-|--interactive)
+				interactive=1
+				;;
+			-q|--quiet)
+				quiet=1
+				;;
 			--branch)
 				branch="${2}"
 				shift
@@ -75,24 +81,33 @@ __numonic_git_pull_request() {
 	fi
 
 	(
+		if [ -n "${quiet:-}" ]; then
+			exec 1>/dev/null
+		fi
+
 		if [ -n "${debug:-}" ]; then
 			set -x
 		fi
 
-		# fetch all upstreams
-		git fetch --all
-
-		# rebase interactively with the remote
-		git rebase --interactive --autosquash --autostash "${remote}"/"${branch}" --empty=drop --signoff || true
-
 		# add all files recursively
 		git add --all
 
-		# recursive clean and ignore gitignore (since all files will be tracked)
-		git clean -xd --force
-
 		# create the commit
-		git commit --edit --signoff
+		git commit --edit
+
+		if [ -n "${interactive:-}" ]; then
+			# rebase interactively with the remote
+			git rebase --interactive --autosquash --autostash "${remote}"/"${branch}" --empty=drop --signoff || true
+
+			# we can't push, so short circuit
+			return 0
+		fi
+
+		# rebase interactively with the remote
+		git rebase --autosquash --autostash "${remote}"/"${branch}" --empty=drop --signoff || true
+
+		# push the changes to the origin
+		git push
 	)
 }
 

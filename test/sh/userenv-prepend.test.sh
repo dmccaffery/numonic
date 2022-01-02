@@ -198,4 +198,4 @@ if userenv prepend --file="${__userenv_file}"; then
 	print-fail "${test_cmd}: ${test_name} failed: exit code $?, but should have been 1"
 fi
 
-return ${final}
+exit ${final}

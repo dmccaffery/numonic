@@ -11,12 +11,12 @@ __numonic_install_azure() {
 				debug=1
 				;;
 			-h|--help)
-				man git-commit-all
+				man install-azure
 				return 0
 				;;
 			-f|--force)
 				if [ -d "${install_dir}" ]; then
-					rm --recursive --force "${install_dir}"
+					rm -rf "${install_dir}"
 				fi
 
 				if command -v az 1>/dev/null 2>&1; then
@@ -41,7 +41,6 @@ __numonic_install_azure() {
 	if command -v az 1>/dev/null 2>&1; then
 		print-warn "install-azure: az is already on the path at: $(command -v az)" \
 			'to reinstall, use the --force flag'
-		man install-azure | cat 1>&2
 		return 1
 	fi
 
@@ -59,48 +58,45 @@ __numonic_install_azure() {
 		return 1
 	fi
 
-	ve_version='16.7.7'
-	ve_archive="virtualenv-${ve_version}.tar.gz"
-	ve_url="https://pypi.python.org/packages/source/v/virtualenv/${ve_archive}"
-
 	(
 		if [ -n "${debug:-}" ]; then
 			set -x
 		fi
 
-		temp=$(mktemp -d)
-		download-safe "${ve_url}" "${temp}/virtualenv.tar.gz"
-
-		tar --extract \
-			--gzip \
-			--strip-components=1 \
-			--file="${temp}"/virtualenv.tar.gz \
-			--directory="${temp}"
-
-		print-warn 'intall-azure: creating virtual environment for azure-cli...'
-		${python_cmd} "${temp}/virtualenv.py" --python "${python_cmd}" "${install_dir}" 1>/dev/null
+		print-warn 'install-azure: creating virtual environment for azure-cli...' 2>&1
+		"${python_cmd}" -m venv "${install_dir}"
 
 		python_cmd="${install_dir}"/bin/python
 
-		print-warn 'install-azure: upgrading pip in virtual environment...'
-		${python_cmd} -m pip install --cache-dir="${temp}" --upgrade pip 1>/dev/null
+		print-warn 'install-azure: upgrading pip in virtual environment...' 2>&1
+		"${python_cmd}" -m pip install --upgrade pip 1>/dev/null 2>&1
 
-		print-warn 'install-azure: installing azure-cli, this may take a minute or two...'
-		${python_cmd} -m pip install --cache-dir="${temp}" --upgrade azure-cli 1>/dev/null
+		print-warn 'install-azure: installing azure-cli, this may take a minute or two...' 2>&1
+		"${python_cmd}" -m pip install --upgrade azure-cli 1>/dev/null
 
 		cat <<-EOT > "${install_dir}/bin/az"
 			#!/usr/bin/env sh
-			${python_cmd} -m azure.cli "\$@"
+			"${python_cmd}" -m azure.cli "\$@"
 		EOT
 
 		# symlink azure cli
 		ln -fs "${install_dir}"/bin/az "${NUMONIC_BIN}"
 
-		# symlink completion
+		# setup completion
 		az_completion="${install_dir}"/bin/az.completion.sh
+
 		if [ -f "${az_completion}" ]; then
 			ln -fs "${az_completion}" "${BASH_COMPLETION_DIR}"/az.inc
-			ln -fs "${az_completion}" "${ZSH_COMPLETION_DIR}"/_az
+			ln -fs "${az_completion}" "${ZSH_COMPLETION_DIR}"/az.sh
+
+			cat <<- 'EOT' > "${ZSH_COMPLETION_DIR}"/_az
+			#compdef az
+			_az() {
+			  [ -f "${ZSH_COMPLETION_DIR}"/az.sh ] && source "${ZSH_COMPLETION_DIR}"/az.sh
+			}
+			EOT
+
+			chmod +x "${ZSH_COMPLETION_DIR}"/_az
 		fi
 	)
 
@@ -109,7 +105,6 @@ __numonic_install_azure() {
 
 	. import-userenv
 	userenv set AZURE_CLI_PATH="${install_dir}" 1>/dev/null 2>&1
-	userenv prepend-path "${install_dir}/bin" 1>/dev/null 2>&1 || true
 }
 
 __numonic_install_azure "$@"

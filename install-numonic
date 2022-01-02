@@ -2,7 +2,7 @@
 
 set -e
 
-install_script_dir="${2:-$(cd -- "$(dirname -- "$0")" && pwd -P)}"
+install_script_dir="$(cd -- "$(dirname -- "$0")" && pwd -P)"
 
 export NUMONIC_LOCAL="${HOME}"/.local
 export NUMONIC_HOME="${NUMONIC_LOCAL}"/numonic
@@ -89,8 +89,10 @@ __numonic_install() {
 		# use the correct shell
 		use-shell "${shell}"
 
-		# open the changelog url
-		open-url --quiet "https://github.com/automotivemastermind/numonic/blob/${sha}/CHANGELOG.md"
+		# open the changelog url (if quiet was not requested)
+		if [ -z "${quiet:-}" ]; then
+			open-url --quiet "https://github.com/automotivemastermind/numonic/blob/${sha}/CHANGELOG.md"
+		fi
 	)
 }
 
@@ -197,7 +199,7 @@ __numonic_install_deps() {
 	fi
 
 	# iterate over each uname
-	for current in unames=$(print-unames); do
+	for current in $(print-unames); do
 
 		# find the install path for the uname
 		uname_dir="${install_script_dir}"/src/sh/install/"${current}".sh

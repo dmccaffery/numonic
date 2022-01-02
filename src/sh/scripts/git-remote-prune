@@ -58,6 +58,5 @@ __numonic_git_remote_prune() {
 		fi
 
 		git remote prune "${remote}"
-		git fetch --prune --prune-tags "${remote}"
 	)
 }

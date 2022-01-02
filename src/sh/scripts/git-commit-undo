@@ -13,7 +13,7 @@ __numonic_git_commit_undo() {
 				return 0
 				;;
 			*?)
-				print-fail "git commit-undo: unknown argument ${1}"
+				print-fail "git commit-undo: too many arguments, argument: ${1} is unexpected"
 				man git commit-undo | cat 1>&2
 				return 1
 				;;

@@ -1,0 +1,32 @@
+name: containerd
+
+cpus: 2
+memory: 4GiB
+disk: 100GiB
+
+ssh:
+  localPort: 0
+  loadDotSSHPubKeys: true
+  forwardAgent: false
+
+mounts:
+  - location: "~"
+    writable: false
+  - location: "/tmp/lima"
+    writable: true
+
+images:
+  - location: "https://cloud-images.ubuntu.com/impish/current/impish-server-cloudimg-amd64.img"
+    arch: "x86_64"
+  - location: "https://cloud-images.ubuntu.com/impish/current/impish-server-cloudimg-arm64.img"
+    arch: "aarch64"
+
+containerd:
+  system: true
+  user: true
+
+video:
+  display: "none"
+
+propagateProxyEnv: true
+useHostResolver: true

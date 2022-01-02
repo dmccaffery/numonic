@@ -29,7 +29,7 @@ __numonic_git_delete_merged() {
 					branch="$1"
 				else
 					print-fail "git delete-merged: too many arguments, argument: ${1} is unexpected"
-					man git-done | cat 1>&2
+					man git-delete-merged | cat 1>&2
 					return 1
 				fi
 				;;
@@ -63,6 +63,7 @@ __numonic_git_delete_merged() {
 
 	print-warn '' \
 		'GIT DELETE MERGED' \
+		"default : ${default}" \
 		"exclude : ${exclude}" \
 	''
 

@@ -12,8 +12,11 @@ __numonic_git_commit_amend() {
 				man git commit-amend
 				return 0
 				;;
+			-q|--quiet)
+				quiet=1
+				;;
 			*?)
-				print-fail "git commit-amend: unknown argument ${1}"
+				print-fail "git commit-amend: too many arguments, argument: ${1} is unexpected"
 				man git commit-amend | cat 1>&2
 				return 1
 				;;
@@ -28,8 +31,12 @@ __numonic_git_commit_amend() {
 			set -x
 		fi
 
+		if [ -n "${quiet:-}" ]; then
+			exec 1>/dev/null
+		fi
+
 		git add --all
-		git commit --all --amend
+		git commit --amend --signoff
 	)
 }
 

@@ -14,7 +14,7 @@ edit-bashrc - opens an editor to the user-specific bash startup script
 
 This command will open the editor defined by the **EDITOR** environment variable. If the variable is not set then the
 default editor will be **vi**. Note that numonic will detect whether or not Visual Studio Code is available on the
-current PATH and will set this to the default editor if not otherwise set in the user environment (**userenv**).
+current PATH and will set this to the default editor if not otherwise set in the user environment: **userenv**(1).
 
 The user-specific bash startup script is located at:
 
@@ -24,7 +24,7 @@ $HOME/.local/share/bashrc
 
 If the file does not exist, it will be created with the correct shebang for bash.
 
-For simple environment variables, we highly recommend using the **userenv** commands, which will make environment
+For simple environment variables, we highly recommend using the **userenv**(1) commands, which will make environment
 variables available across different shells (both bash and zsh) and supports directory-specific variables as well.
 
 # OPTIONS

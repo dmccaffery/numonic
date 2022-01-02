@@ -1,0 +1,8 @@
+#! /usr/bin/env sh
+
+set -e
+
+install-brew-formulae \
+	--name=shellspec \
+	--tap=shellspec/shellspec \
+	"$@"

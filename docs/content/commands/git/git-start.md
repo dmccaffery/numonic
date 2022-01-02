@@ -1,33 +1,33 @@
 ---
-title: git-checkout-branch
+title: git-start
 ---
 
 # NAME
 
-git-checkout-branch - create a new branch with the specified name and tracks the branch in the origin
+git-start - create a new branch with the specified name and tracks the branch in the remote (origin)
 
 # SYNOPSIS
 
-**git** **checkout-branch** <*branch*> [<*remote*>] [<*start-point*>] [**-d** | **--debug**] [**-dr** | **--dry-run**] [**-h** | **--help**] [**-q** | **--quiet**]
+**git** **start** <*branch*> [<*remote*>] [<*start-point*>] [**-d** | **--debug**] [**-dr** | **--dry-run**] [**-h** | **--help**] [**-q** | **--quiet**]
 
-**git** **checkout-branch** **-b** <*branch*> [**-r** <*remote*>] [**-sp** <*start-point*>]
+**git** **start** **-b** <*branch*> [**-r** <*remote*>] [**-sp** <*start-point*>]
 
-**git** **checkout-branch** **--branch=**<*branch*> [**--remote=**<*remote*>] [**--start-point=**<*start-point*>]
+**git** **start** **--branch=**<*branch*> [**--remote=**<*remote*>] [**--start-point=**<*start-point*>]
 
 # DESCRIPTION
 
 This command creates a new branch with the specified **branch** name. The newly created branch will then be pushed
-to the specified **remote**, which is **origin** by default. A **start-point** can also be supplied that can be used
-as the **HEAD** for the newly created branch. If a **start-point** is not supplied, then the **HEAD** of the current
-working tree will be used instead.
+to the specified **remote**, which is *origin* by default. A **start-point** can also be supplied that can be used
+as the *HEAD* for the newly created branch. If a **start-point** is not supplied, then the *HEAD* of the current
+branch will be used instead.
 
 If there are any untracked changes on the current working tree, they will be moved to the new branch.
 
-This is essentially equivelant to the following git commands:
+The command essentially performs the following:
 
 ```sh
-git pull
-git checkout --recurse-submodules -b \<branch\> \<start-point\>
+git pull \<remote\>
+git switch --force-create \<branch\>
 git push --set-upstream \<remote\> \<branch\>
 ```
 
@@ -70,38 +70,31 @@ suppress any output to stdout (any errors will still be printed)
 
 # EXAMPLES
 
-## git checkout-branch feat/something-new
-
-## git checkout-branch -b feat/something-new
-
-## git checkout-branch --branch=feat/something-new
+## git start feat/something-new
+## git start -b feat/something-new
+## git start --branch=feat/something-new
 
 create a new branch tracked by the **origin** called **feat/something-new** using the **HEAD** of the current branch
 
-## git checkout-branch feat/something-new upstream
-
-## git checkout-branch -b feat/something-new -r upstream
-
-## git checkout-branch --branch=feat/something-new --remote=upstream
+## git start feat/something-new upstream
+## git start -b feat/something-new -r upstream
+## git start --branch=feat/something-new --remote=upstream
 
 create a new branch tracked by the **upstream** called **feat/something-new** using the **HEAD** of the current branch
 
-## git checkout-branch feat/something-new upstream HEAD~1
-
-## git checkout-branch -b feat/something-new -r upstream -sp HEAD~1
-
-## git checkout-branch --branch=feat/something-new --remote=upstream --start-point=HEAD~1
+## git start feat/something-new upstream HEAD~1
+## git start -b feat/something-new -r upstream -sp HEAD~1
+## git start --branch=feat/something-new --remote=upstream --start-point=HEAD~1
 
 create a new branch tracked by the **upstream** called **feat/something-new** using the previous commit of **HEAD** of
 the current branch
 
-## git checkout-branch --branch feat/something-new --start-point HEAD~1
-
-## git checkout-branch --branch=feat/something-new --start-point=HEAD~1
+## git start --branch feat/something-new --start-point HEAD~1
+## git start --branch=feat/something-new --start-point=HEAD~1
 
 create a new branch tracked by the **origin** called **feat/something-new** using the previous commit of **HEAD** of
 the current branch
 
 # SEE ALSO
 
-**git-checkout**(1), **git-switch**(1), **git-push**(1)
+**git-start-feat**(1), **git-start-fix**(1), **git-checkout**(1), **git-switch**(1), **git-push**(1)

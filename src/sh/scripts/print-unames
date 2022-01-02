@@ -23,15 +23,19 @@ if [ -f /etc/os-release ]; then
 		ID_LIKE=''
 	fi
 
-	UNAMES=$(printf '%s' "${ID} ${ID_LIKE} linux" | uniq)
+	unames=$(printf '%s' "${ID} ${ID_LIKE} linux" | uniq)
 else
-	UNAMES=$(uname | tr '[:upper:]' '[:lower:]')
+	unames=$(uname | tr '[:upper:]' '[:lower:]')
 fi
 
 # detect wsl
 if [ -d "/mnt/wsl" ]; then
-	UNAMES="wsl ${UNAMES}"
+	unames="wsl ${unames}"
 fi
 
+# append the all uname
+unames="${unames} common"
+
 # print the unames
-printf '%s' "${UNAMES}"
+# shellcheck disable=SC2086
+printf '%s' "${unames}"

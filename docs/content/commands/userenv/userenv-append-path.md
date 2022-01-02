@@ -14,7 +14,7 @@ userenv-append-path - appends a path to the end of the **PATH** variable within 
 
 # DESCRIPTION
 
-This command will append the specified path to the **PATH** variable witihn the user specific environment file,
+This command will append the specified path to the **PATH** variable within the user specific environment file,
 typically located at $HOME/.pam_environment. The separator will always be a colon (:).
 
 If the specified path is already in the **PATH** variable, then the command will fail with an exit code of 2. For all

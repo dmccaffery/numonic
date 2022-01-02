@@ -1,0 +1,66 @@
+name: docker
+
+cpus: 2
+memory: 4GiB
+disk: 100GiB
+
+ssh:
+  localPort: 60006
+  loadDotSSHPubKeys: true
+  forwardAgent: false
+
+mounts:
+  - location: "~"
+    writable: false
+  - location: "/tmp/lima"
+    writable: true
+
+images:
+  - location: "https://cloud-images.ubuntu.com/impish/current/impish-server-cloudimg-amd64.img"
+    arch: "x86_64"
+  - location: "https://cloud-images.ubuntu.com/impish/current/impish-server-cloudimg-arm64.img"
+    arch: "aarch64"
+
+containerd:
+  system: false
+  user: false
+
+provision:
+  - mode: system
+    script: |
+      #!/bin/bash
+      set -eux -o pipefail
+      command -v docker >/dev/null 2>&1 && exit 0
+      export DEBIAN_FRONTEND=noninteractive
+      curl -fsSL https://get.docker.com | sh
+      apt-get install -y uidmap dbus-user-session
+  - mode: user
+    script: |
+      #!/bin/bash
+      set -eux -o pipefail
+      systemctl --user start dbus
+      dockerd-rootless-setuptool.sh install
+      docker context use rootless
+      sudo usermod -aG docker "$(whoami)"
+
+probes:
+  - script: |
+      #!/bin/bash
+      set -eux -o pipefail
+      if ! timeout 30s bash -c "until command -v docker >/dev/null 2>&1; do sleep 3; done"; then
+        echo >&2 "docker is not installed yet"
+        exit 1
+      fi
+      if ! timeout 30s bash -c "until pgrep rootlesskit; do sleep 3; done"; then
+        echo >&2 "rootlesskit (used by rootless docker) is not running"
+        exit 1
+      fi
+      sudo docker --context=default run --rm --privileged docker.io/aptman/qus --static -- --persistent --credential
+    hint: See "/var/log/cloud-init-output.log". in the guest
+
+portForwards:
+  - guestSocket: "/run/user/{{.UID}}/docker.sock"
+    hostSocket: "{{.Home}}/.lima/docker/user.sock"
+
+  - guestSocket: "/var/run/docker.sock"
+    hostSocket: "{{.Home}}/.lima/docker/root.sock"
