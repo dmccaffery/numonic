@@ -8,7 +8,7 @@ if ! command gpg-connect-agent 1>/dev/null 2>&1; then
 fi
 
 # relearn the smart card
-gpg-connect-agent "scd serialno" "learn --force" /bye
+gpg-connect-agent updatestartuptty "scd serialno" "learn --force" /bye
 
 # print the card status
 gpg --card-status
