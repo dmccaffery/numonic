@@ -85,7 +85,7 @@ __numonic_install_gcloud() {
 			--usage-reporting false \
 			--quiet \
 			--path-update false \
-			--additional-components kubectl gsutil core 2>&1
+			--additional-components kubectl gsutil core cloud_sql_proxy 2>&1
 
 		# symlink gcloud
 		ln -fs "${install_dir}"/bin/gcloud "${NUMONIC_BIN}"
