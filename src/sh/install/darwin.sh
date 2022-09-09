@@ -105,7 +105,7 @@ __numonic_install_darwin_fonts() {
 	mkdir -p "${font_dir}" 1>/dev/null 2>&1
 
 	# extract fira code
-	unzip "${temp_dir}/FiraCode.zip" 'Fira*.otf' -x '*Windows*' -d "${font_dir}" 1>/dev/null
+	unzip "${temp_dir}/FiraCode.zip" 'Fira*.ttf' -x '*Windows*' -d "${font_dir}" 1>/dev/null
 
 	# remove temp
 	rm -rf "${temp_dir}" 1>/dev/null 2>&1
