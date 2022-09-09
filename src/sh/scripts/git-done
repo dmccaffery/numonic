@@ -3,40 +3,49 @@
 set -e
 
 __numonic_git_done() {
+
 	branch=
-	remote=
+	origin=
+	upstream="upstream"
 
 	while :; do
 		case $1 in
-			--help)
-				man git-done
-				return 0
-				;;
 			-dr|--dry-run)
 				dry_run=1
 				;;
-			--debug)
+			-d|--debug)
 				debug=1
 				;;
-			--branch)
-				branch="$2"
+			-b|--branch)
+				branch="${2}"
 				shift
 				;;
 			--branch=*)
 				branch="${1#*=}"
 				;;
-			--remote)
-				remote="$2"
+			-r|-o|--remote|--origin)
+				origin="${2}"
 				shift
 				;;
-			--remote=*)
-				remote="${1#*=}"
+			--remote=*|--origin=*)
+				origin="${1#*=}"
+				;;
+			-u|--upstream)
+				upstream="${2}"
+				shift
+				;;
+			--upstream=*)
+				upstream="${1#*=}"
+				;;
+			-h|--help)
+				man git-done
+				return 0
 				;;
 			?*)
 				if [ -z "${branch:-}" ]; then
-					branch="$1"
+					branch="${1}"
 				elif [ -z "${remote:-}" ]; then
-					remote="$1"
+					remote="${1}"
 				else
 					print-fail "git done: too many arguments, argument: ${1} is unexpected"
 					man git-done | cat 1>&2
@@ -50,13 +59,9 @@ __numonic_git_done() {
 		shift
 	done
 
-	if [ -z "${branch:-}" ]; then
-		branch="next"
-	fi
-
-	if [ -z "${remote:-}" ]; then
-		remote="origin"
-	fi
+    if [ -z "${origin:-}" ]; then
+        origin="origin"
+    fi
 
 	for current in "${branch}" develop next main master; do
 		if git show-ref --quiet --verify "refs/heads/${current}"; then
@@ -65,10 +70,29 @@ __numonic_git_done() {
 		fi
 	done
 
+	main=
+
+	for current in "${branch}" develop next main master; do
+		if git show-ref --quiet --verify "refs/remotes/${upstream}/${current}"; then
+			main="${current}"
+			break
+		fi
+	done
+
+	if [ -z "${main:-}" ]; then
+		upstream=
+	fi
+
 	print-warn '' \
 		'GIT DONE' \
-		"branch: ${branch}" \
-		"remote: ${remote}" \
+		'' \
+		'ORIGIN INFO' \
+		"remote : ${origin}" \
+		"branch : ${branch}" \
+		'' \
+		'UPSTREAM INFO' \
+		"remote : ${upstream:-"n/a"}" \
+		"branch : ${main:-"n/a"}" \
 	''
 
 	if [ -n "${dry_run:-}" ]; then
@@ -80,20 +104,19 @@ __numonic_git_done() {
 			set -x
 		fi
 
-		# attempt to checkout the branch
-		git checkout "${branch}"
-
-		# update the branch
+		git checkout --recurse-submodules "${branch}"
 		git-update
+		git-delete-merged --remote="${origin}" --branch="${branch}"
+		git-remote-prune --remote="${origin}"
+		git-delete-gone --remote="${origin}"
 
-		# delete merged branches
-		git-delete-merged --branch="${branch}"
-
-		# prune the remote
-		git-remote-prune --remote="${remote}"
-
-		# delete branches that don't exist on the remote
-		git-delete-gone --remote="${remote}"
+		# determine if we are on a fork
+		if [ -n "${main:-}" ]; then
+			git-remote-prune --remote="${upstream}"
+			git pull --all
+			git merge --ff-only "${upstream}/${main}"
+			git push "${origin}" "${branch}"
+		fi
 	)
 }
 

@@ -4,29 +4,51 @@ set -e
 
 __numonic_git_delete_merged() {
 	branch=
+	remote=
+	exclude="develop|next|main|master"
 
 	while :; do
 		case $1 in
-			--help)
-				man git-delete-merged
-				return 0
-				;;
 			-dr|--dry-run)
 				dry_run=1
 				;;
-			--debug)
+			-d|--debug)
 				debug=1
 				;;
-			--branch)
-				branch="$2"
+			-b|--branch)
+				branch="${2}"
 				shift
 				;;
 			--branch=*)
 				branch="${1#*=}"
 				;;
+			-r|--remote)
+				remote="${2}"
+				shift
+				;;
+			-e|--exclude)
+				if [ "${exclude#*"${1}"}" = "${exclude}" ]; then
+					exclude="${exclude}|${1}"
+				fi
+				shift
+				;;
+			--exclude=*)
+				if [ "${exclude#*"${1#*=}"}" = "${exclude}" ]; then
+					exclude="${exclude}|${1#*=}"
+				fi
+				;;
+			--remote=*)
+				remote="${1#*=}"
+				;;
+			-h|--help)
+				man git-delete-merged
+				return 0
+				;;
 			?*)
 				if [ -z "${branch:-}" ]; then
-					branch="$1"
+					branch="${1}"
+				elif [ -z "${remote:-}" ]; then
+					remote="${1}"
 				else
 					print-fail "git delete-merged: too many arguments, argument: ${1} is unexpected"
 					man git-delete-merged | cat 1>&2
@@ -44,8 +66,11 @@ __numonic_git_delete_merged() {
 		branch="next"
 	fi
 
+	if [ -z "${remote:-}" ]; then
+		remote="origin"
+	fi
+
 	default=
-	exclude=
 
 	for current in "${branch}" develop next main master; do
 		if git show-ref --quiet --verify "refs/heads/${current}"; then
@@ -55,7 +80,7 @@ __numonic_git_delete_merged() {
 
 			if [ -z "${exclude:-}" ]; then
 				exclude="${current}"
-			elif [ "${exclude#"${current}"}" = "${exclude}" ]; then
+			elif [ "${exclude#*"${current}"}" = "${exclude}" ]; then
 				exclude="${exclude}|${current}"
 			fi
 		fi
@@ -63,7 +88,8 @@ __numonic_git_delete_merged() {
 
 	print-warn '' \
 		'GIT DELETE MERGED' \
-		"default : ${default}" \
+		"remote  : ${remote}" \
+		"branch  : ${default}" \
 		"exclude : ${exclude}" \
 	''
 

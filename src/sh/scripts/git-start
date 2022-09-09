@@ -5,7 +5,8 @@ set -e
 __numonic_git_start() {
 
 	branch=
-	remote=
+	origin=
+	upstream="upstream"
 	ref=
 
 	while :; do
@@ -23,12 +24,19 @@ __numonic_git_start() {
 			--branch=*)
 				branch="${1#*=}"
 				;;
-			-r|--remote)
-				remote="${2}"
+			-r|-o|--remote|--origin)
+				origin="${2}"
 				shift
 				;;
-			--remote=*)
-				remote="${1#*=}"
+			--remote=*|--origin=*)
+				origin="${1#*=}"
+				;;
+			-u|--upstream)
+				upstream="${2}"
+				shift
+				;;
+			--upstream=*)
+				upstream="${1#*=}"
 				;;
 			-ref|-sp|--ref|--start-point)
 				ref="${2}"
@@ -44,12 +52,12 @@ __numonic_git_start() {
 			?*)
 				if [ -z "${branch:-}" ]; then
 					branch="${1}"
-				elif [ -z "${remote:-}" ]; then
-					remote="${1}"
+				elif [ -z "${origin:-}" ]; then
+					origin="${1}"
 				elif [ -z "${ref:-}" ]; then
 					ref="${1}"
 				else
-					print-fail "git start: too many arguments, argument: ${1} is unexpected"
+					print-fail "git-start: too many arguments, argument: ${1} is unexpected"
 					man git-start | cat 1>&2
 					return 1
 				fi
@@ -61,25 +69,42 @@ __numonic_git_start() {
 		shift
 	done
 
+	if [ -z "${origin:-}" ]; then
+		origin="origin"
+	fi
+
+	if [ -z "${ref:-}" ]; then
+		ref="HEAD"
+	fi
+
 	if [ -z "${branch}" ]; then
 		print-fail "git start: a branch name must be specified"
 		man git-start | cat 1>&2
 		return 1
 	fi
 
-	if [ -z "${remote}" ]; then
-		remote="origin"
-	fi
+	for current in develop next main master; do
+		if git show-ref --quiet --verify "refs/heads/${current}"; then
+			main="${current}"
+			break
+		fi
+	done
 
-	if [ -z "${ref}" ]; then
-		ref="HEAD"
+	if [ -z "${main:-}" ]; then
+		upstream=
 	fi
 
 	print-warn '' \
 		'GIT START' \
-		"branch      : ${branch}" \
-		"remote      : ${remote}" \
-		"start-point : ${ref}" \
+		'' \
+		'ORIGIN INFO' \
+		"remote : ${origin}" \
+		"branch : ${branch}" \
+		"ref    : ${ref}" \
+		'' \
+		'UPSTREAM INFO' \
+		"remote : ${upstream:-"n/a"}" \
+		"ref    : ${main:-"n/a"}" \
 	''
 
 	if [ -n "${dry_run:-}" ]; then
@@ -91,9 +116,18 @@ __numonic_git_start() {
 			set -x
 		fi
 
-		git pull "${remote}"
+		# attempt to pull from the origin
+		git pull "${origin}" || true
+
+		# determine if we are on a fork
+		if [ -n "${main:-}" ]; then
+			git pull --rebase "${upstream}" "${main}"
+			git push || true
+		fi
+
+		# create the new branch
 		git switch --force-create "${branch}" "${ref}"
-		git push --set-upstream "${remote}" "${branch}"
+		git push --set-upstream "${origin}" "${branch}"
 	)
 }
 
