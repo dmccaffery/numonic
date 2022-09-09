@@ -7,8 +7,9 @@ arm64 (aarch64) including full support for Apple Silicon on macOS.
 
 * macOS
   * 10.15 (Catalina) - intel only
-  * 11.0 (Big Sur)
-  * 12.0 (Monterey)
+  * 11 (Big Sur)
+  * 12 (Monterey)
+  * 13 (Ventura)
 * Debian
   * 7
   * 8
