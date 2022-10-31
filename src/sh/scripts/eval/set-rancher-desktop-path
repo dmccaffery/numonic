@@ -1,0 +1,12 @@
+#! /usr/bin/env sh
+
+rd_home="${HOME}/.rd"
+rd_bin="${rd_home}/bin"
+
+if [ -d "${rd_bin:-}" ]; then
+	export PATH="${rd_bin}:${PATH}"
+fi
+
+if [ -z "${DOCKER_SOCK:-}" ] && [ -s "${rd_home}/docker.sock" ]; then
+	export DOCKER_SOCK="${rd_home}/docker.sock"
+fi
