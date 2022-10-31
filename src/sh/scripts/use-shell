@@ -27,6 +27,9 @@ __numonic_use_shell() {
 
 			# print success
 			print-success "numonic: installing prerequisites for ${numonic_shell}: ${current}"
+
+			# break from the loop
+			break
 		fi
 	done
 
