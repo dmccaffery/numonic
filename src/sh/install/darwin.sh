@@ -112,4 +112,8 @@ __numonic_install_darwin_fonts() {
 }
 
 __numonic_install_darwin_brew
-__numonic_install_darwin_fonts
+
+# do not install fonts when there is no tty or this is an ssh session
+if [ -z "${SSH_CLIENT:-}" ] || [ ! -t 1 ]; then
+	__numonic_install_darwin_fonts
+fi

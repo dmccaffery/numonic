@@ -33,4 +33,7 @@ __numonic_install_linux_fonts() {
 	rm -rf "${temp_dir}" 1>/dev/null 2>&1
 }
 
-__numonic_install_linux_fonts
+# do not install fonts when there is no tty or this is an ssh session
+if [ -z "${SSH_CLIENT:-}" ] || [ ! -t 1 ]; then
+	__numonic_install_linux_fonts
+fi
