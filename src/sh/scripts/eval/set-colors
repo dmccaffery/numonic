@@ -2,13 +2,18 @@
 # shellcheck disable=SC2155
 
 if [ -t 1 ]; then
-	export FORMAT_CLEAR="\u001b[0m"		# CLEAR ALL FORMAT
-	export FORMAT_BOLD="\u001b[1m"		# SET BRIGHT/BOLD
+	export FORMAT_CLEAR="\033[0m"		# CLEAR ALL FORMAT
+	export FORMAT_BOLD="\033[1m"		# SET BRIGHT/BOLD
+	export FORMAT_UNDERLINE="\033[4m"	# UNDERLINE
 
-	export CLR_BLACK="\u001b[30m"		# ANSI BLACK (GRAY)
-	export CLR_RED="\u001b[31m"			# ANSI RED
-	export CLR_GREEN="\u001b[32m"		# ANSI GREEN
-	export CLR_YELLOW="\u001b[33m"		# ANSI YELLOW
+	export CLR_BLACK="\033[30m"			# ANSI BLACK (GRAY)
+	export CLR_RED="\033[31m"			# ANSI RED
+	export CLR_GREEN="\033[32m"			# ANSI GREEN
+	export CLR_YELLOW="\033[33m"		# ANSI YELLOW
+	export CLR_BLUE="\033[34m"			# ANSI BLUE
+	export CLR_MAGENTA="\033[35m"		# ANSI MAGENTA (PURPLE)
+	export CLR_CYAN="\033[36m"			# ANSI CYAN
+	export CLR_WHITE="\033[37m"			# ANSI WHITE
 
 	export CLR_BRIGHT_BLACK="${FORMAT_BOLD}${CLR_BLACK}"		# BRIGHT BLACK (GRAY)
 	export CLR_BRIGHT_RED="${FORMAT_BOLD}${CLR_RED}"			# BRIGHT RED
@@ -25,7 +30,6 @@ if [ -t 1 ]; then
 else
 	export FORMAT_CLEAR=''
 	export FORMAT_BOLD=''
-	export FORMAT_DIM=''
 	export FORMAT_UNDERLINE=''
 
 	export CLR_BLACK=''
