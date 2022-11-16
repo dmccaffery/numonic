@@ -31,7 +31,7 @@ overwritten on every update:
 
 To override any of the default configuration included by these files, please use the following location:
 
-\$HOME/.local/share/bashrc
+\$HOME/.config/bashrc
 
 The **edit-bashrc** command will automatically create this file if does not already exist and open the file in the
 default editor.

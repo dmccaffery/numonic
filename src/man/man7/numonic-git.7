@@ -1,4 +1,4 @@
-.TH "NUMONIC-GIT" "7" "November 18, 2021" "Numonic v1.0.0" "Numonic Manual"
+.TH "NUMONIC-GIT" "7" "January 2, 2022" "Numonic v1.0.0" "Numonic Manual"
 .nh \" Turn off hyphenation by default.
 .SH NAME
 .PP
@@ -12,16 +12,18 @@ Numonic includes a large collection of extensions to the git cli that make opera
 easier.
 These extensions are available via the git cli itself and can be aliased for even shorter names, if you so choose.
 They are also tied into the git help system.
-For example, \f[C]man git-fork-clone\f[R] or \f[C]git fork-clone --help\f[R] will both pull up the manual for the
-\f[C]fork-clone\f[R] extension.
+For example, \f[V]man git-fork-clone\f[R] or \f[V]git fork-clone --help\f[R] will both pull up the manual for the
+\f[V]fork-clone\f[R] extension.
 .SH AVAILABLE COMMANDS
-.SS FORK WORKFLOW
+.SS WORKFLOW
 .IP \[bu] 2
 \f[B]git-fork-clone\f[R](1)
 .IP \[bu] 2
 \f[B]git-start\f[R](1)
 .IP \[bu] 2
 \f[B]git-pull-request\f[R](1)
+.IP \[bu] 2
+\f[B]git-done\f[R](1)
 .IP \[bu] 2
 \f[B]git-fork-done\f[R](1)
 .SS COMMIT AND IDEATE
@@ -47,9 +49,9 @@ For example, \f[C]man git-fork-clone\f[R] or \f[C]git fork-clone --help\f[R] wil
 .IP \[bu] 2
 \f[B]git-delete-merged\f[R](1)
 .IP \[bu] 2
-\f[B]git-remote-prune\f[R](1)
-.IP \[bu] 2
 \f[B]git-done\f[R](1)
+.IP \[bu] 2
+\f[B]git-remote-prune\f[R](1)
 .IP \[bu] 2
 \f[B]git-update\f[R](1)
 .SS CONFIGURATION
@@ -150,4 +152,4 @@ git done
 \f[B]git-commit-wip\f[R](1), \f[B]git-reset-head\f[R](1), \f[B]git-delete-gone\f[R](1), \f[B]git-delete-merged\f[R](1),
 \f[B]git-remote-prune\f[R](1), \f[B]git-done\f[R](1), \f[B]git-update\f[R](1), \f[B]git-edit-config\f[R](1)
 .SH AUTHORS
-Deavon M. McCaffery; Not Committed Yet
+Deavon M. McCaffery

@@ -23,17 +23,21 @@ __numonic_edit_bashrc() {
 
 	(
 		if [ -n "${debug:-}" ]; then
+			print-warn 'edit-bashrc: debug enabled'
 			set -x
 		fi
 
-		bashrc_path="${NUMONIC_SHARE}/bashrc"
+		bashrc_path="${NUMONIC_CONFIG}/bashrc"
+
+		if [ ! -d "${NUMONIC_CONFIG}" ]; then
+			mkdir -p "${NUMONIC_CONFIG}"
+		fi
 
 		if [ ! -f "${bashrc_path}" ]; then
 			printf "%s\n\n" "#! /usr/bin/env bash" > "${bashrc_path}"
 		fi
 
-		echo "EDITOR: ${EDITOR}"
-
+		chmod +x "${bashrc_path}"
 		${EDITOR:-vi} "${bashrc_path}"
 	)
 }

@@ -3,16 +3,24 @@
 __numonic_set_window_title() {
 
 	# set the window title
-	printf "\033]0; %s \007" "${USER}@${HOSTNAME%%.*} -:- ${PWD##*/}"
+	printf "\033]0; %s \007" "${USER}@${HOST%%.*}"
 }
 
 # detect startship
 if command -v starship 1>/dev/null 2>&1; then
 
-	# set the starship configuration path
-	if [ -f "${NUMONIC_SHARE}/starship.toml" ]; then
-		export STARSHIP_CONFIG="${NUMONIC_SHARE}/starship.toml"
+	if [ -f "${HOME}/.config/starship.${TERM_PROGRAM}.toml" ]; then
+		STARSHIP_CONFIG="${HOME}/.config/starship.${TERM_PROGRAM}.toml"
+	elif [ -f "${HOME}/.config/starship.toml" ]; then
+		STARSHIP_CONFIG="${HOME}/.config/starship.toml"
+	elif [ -f "${NUMONIC_SHARE}/starship.${TERM_PROGRAM}.toml" ]; then
+		STARSHIP_CONFIG="${NUMONIC_SHARE}/starship.${TERM_PROGRAM}.toml"
+	elif [ -f "${NUMONIC_SHARE}/starship.toml" ]; then
+		STARSHIP_CONFIG="${NUMONIC_SHARE}/starship.toml"
 	fi
+
+	# export the config
+	export STARSHIP_CONFIG
 
 	# use starship instead of prompt command
 	eval "$(starship init bash)"

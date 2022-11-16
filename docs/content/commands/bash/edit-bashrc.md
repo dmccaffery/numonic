@@ -19,7 +19,7 @@ current PATH and will set this to the default editor if not otherwise set in the
 The user-specific bash startup script is located at:
 
 ```sh
-$HOME/.local/share/bashrc
+$HOME/.config/bashrc
 ```
 
 If the file does not exist, it will be created with the correct shebang for bash.
