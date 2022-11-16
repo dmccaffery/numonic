@@ -5,6 +5,7 @@ export NUMONIC_LOCAL="${NUMONIC_LOCAL:-"${HOME}/.local"}"
 export NUMONIC_HOME="${NUMONIC_HOME:-"${NUMONIC_LOCAL}/numonic"}"
 export NUMONIC_SHARE="${NUMONIC_SHARE:-"${NUMONIC_LOCAL}/share"}"
 export NUMONIC_BIN="${NUMONIC_BIN:-"${NUMONIC_LOCAL}/bin"}"
+export NUMONIC_CONFIG="${NUMONIC_CONFIG:-"${HOME}/.config"}"
 
 export MANPATH="${NUMONIC_HOME}/man:${MANPATH}"
 

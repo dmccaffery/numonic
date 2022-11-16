@@ -55,6 +55,6 @@ for eval_script in "${NUMONIC_HOME}"/zsh/scripts/eval/*; do
 done
 
 # test for user zshrc
-if [ -f "${NUMONIC_SHARE}"/zshrc ]; then
-	. "${NUMONIC_SHARE}"/zshrc
+if [ -f "${HOME}"/.config/zshrc ]; then
+	. "${HOME}"/.config/zshrc
 fi

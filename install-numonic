@@ -139,12 +139,8 @@ __numonic_install_copy() {
 			continue
 		fi
 
-		# determine if the item does not exist
-		if [ ! -f "${item_to}" ]; then
-
-			# copy the user item
-			cp "${item}" "${item_to}"
-		fi
+		# copy the user item
+		cp -f "${item}" "${item_to}"
 	done
 }
 

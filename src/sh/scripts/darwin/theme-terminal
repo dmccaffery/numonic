@@ -45,21 +45,18 @@ __numonic_theme_terminal() {
 			set -x
 		fi
 
-		theme="${theme-terminal:-numonic-dark}"
-
-		current_default=$(defaults read com.apple.Terminal "Default Window Settings")
-		current_startup=$(defaults read com.apple.Terminal "Startup Window Settings")
-
-		if [ "${theme}" = "${current_default:-}" ] && [ "${theme}" = "${current_startup}" ]; then
-			print-warn "theme-terminal: the requested theme ${theme} is already set."
-			return 1
-		fi
-
+		theme="${theme:-numonic-dark}"
 		theme_file="${NUMONIC_HOME}"/themes/darwin/"${theme}".terminal
 
 		if [ ! -f "${theme_file}" ]; then
 			print-fail "theme-terminal: the theme ${theme} is not supported."
 			exit 1
+		fi
+
+		if [ -f /usr/libexec/PlistBuddy ] && [ -f "${HOME}"/Library/Preferences/com.apple.Terminal.plist ]; then
+			# delete existing key if it exists
+			/usr/libexec/PlistBuddy -c "Delete :Window\ Settings:${theme}" \
+				"${HOME}"/Library/Preferences/com.apple.Terminal.plist 1>/dev/null 2>&1 || true
 		fi
 
 		# disable the quarantine

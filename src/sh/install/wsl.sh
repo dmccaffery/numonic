@@ -16,27 +16,27 @@ if [ ! -d "${appdata_dir}" ]; then
 fi
 
 # download fonts
-print-success "wsl: upgrading fira code font..."
+print-success "wsl: upgrading nerd font..."
 temp_dir=$(mktemp -d)
 curl --fail \
 	--silent \
 	--show-error \
 	--location \
-	--output "${temp_dir}"/FiraCode.zip \
-	https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip
+	--output "${temp_dir}"/nerd-font.zip \
+	https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Hack.zip
 
-# determine if fira code already exists
+# determine if nerd font already exists
 if [ -d "${font_dir}" ]; then
 
-	# delete fira code
+	# delete nerd font
 	rm -rf "${font_dir}" 1>/dev/null 2>&1
 fi
 
 # make sure the font dir exists
 mkdir -p "${font_dir}" 1>/dev/null
 
-# extract fira code
-unzip "${temp_dir}"/FiraCode.zip 'Fira*Windows*.ttf' -d "${font_dir}" 1>/dev/null
+# extract nerd font
+unzip "${temp_dir}"/nerd-font.zip '*Windows*.ttf' -d "${font_dir}" 1>/dev/null
 
 # remove temp
 rm -rf "${temp_dir}" 1>/dev/null 2>&1
