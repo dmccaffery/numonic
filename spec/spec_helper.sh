@@ -16,7 +16,8 @@ spec_helper_precheck() {
 	NUMONIC_HOME="${PWD}"/src
 	NUMONIC_LOCAL="${test_home}"/local
 	NUMONIC_SHARE="${test_home}"/local/share
-	NUMONIC_BIN="${test_home}"/local/bin
+	NUMONIC_BIN="${NUMONIC_HOME}"/"${SHELL_TYPE}"/scripts
+	NUMONIC_SH_BIN="${NUMONIC_HOME}"/sh/scripts
 
 	mkdir -p "${NUMONIC_SHARE}"
 	mkdir -p "${NUMONIC_BIN}"
@@ -27,17 +28,21 @@ spec_helper_precheck() {
 	setenv NUMONIC_BIN="${NUMONIC_BIN}"
 
 	setenv SHELL_TYPE="${SHELL_TYPE}"
-}
-
-# This callback function will be invoked after a specfile has been loaded.
-spec_helper_loaded() {
-	:
+	setenv PATH="${NUMONIC_BIN}":"${NUMONIC_SH_BIN}":/usr/local/bin:/usr/bin:/usr/sbin:/bin:/sbin
+	setenv MANPATH="${NUMONIC_HOME}"/man
 }
 
 # This callback function will be invoked after core modules has been loaded.
 spec_helper_configure() {
 	with_fake_editor() {
-		echo "PATH: ${PATH}"
 		EDITOR=fake_editor "$@"
+	}
+
+	is_bash() {
+		test "${SHELL_TYPE}" = "bash"
+	}
+
+	is_not_bash() {
+		test "${SHELL_TYPE}" != "bash"
 	}
 }

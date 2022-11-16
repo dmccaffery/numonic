@@ -31,6 +31,6 @@ for eval_script in "${NUMONIC_HOME}"/bash/scripts/eval/*; do
 done
 
 # test for user bashrc
-if [ -f "${NUMONIC_SHARE}"/bashrc ]; then
-	. "${NUMONIC_SHARE}"/bashrc
+if [ -f "${HOME}"/.config/bashrc ]; then
+	. "${HOME}"/.config/bashrc
 fi
