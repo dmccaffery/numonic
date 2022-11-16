@@ -18,7 +18,7 @@ discharging_symbol = ' '
 [character]
 error_symbol   = '[->](bold red)'
 success_symbol = '[->](bold green)'
-disabled       = false
+disabled       = true
 
 [conda]
 symbol = ' '
@@ -27,7 +27,10 @@ symbol = ' '
 symbol = ' '
 
 [directory]
-read_only = ' '
+truncation_length = 1
+home_symbol       = ' ~'
+read_only_style   = '197'
+read_only         = ' '
 
 [docker_context]
 symbol = ' '
@@ -61,7 +64,7 @@ untracked  = "[](bold yellow) "
 diverged   = '[⇡$ahead_count⇣$behind_count](bold yellow) )'
 ahead      = '[⇡$count](bold yellow) '
 behind     = '[⇣$count](bold red) '
-up_to_date = "([](bold green) )"
+up_to_date = "[](bold green) "
 
 [golang]
 symbol = ' '
