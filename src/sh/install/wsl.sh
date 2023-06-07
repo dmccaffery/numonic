@@ -36,7 +36,7 @@ fi
 mkdir -p "${font_dir}" 1>/dev/null
 
 # extract nerd font
-unzip "${temp_dir}"/nerd-font.zip '*Windows*.ttf' -d "${font_dir}" 1>/dev/null
+unzip "${temp_dir}"/nerd-font.zip '*.ttf' -d "${font_dir}" 1>/dev/null
 
 # remove temp
 rm -rf "${temp_dir}" 1>/dev/null 2>&1
