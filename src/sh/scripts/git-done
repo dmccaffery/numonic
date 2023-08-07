@@ -63,7 +63,13 @@ __numonic_git_done() {
         origin="origin"
     fi
 
-	for current in "${branch}" develop next main master; do
+    if [ -n "${debug:-}" ]; then
+        set -x
+    fi
+
+	remote_branches=$(git ls-remote --heads "${origin}" 2>/dev/null | cut -f 2)
+	for current in "${branch}" develop next main master ${remote_branches}; do
+		current=${current##*refs/heads/}
 		if git show-ref --quiet --verify "refs/heads/${current}"; then
 			branch="${current}"
 			break
@@ -72,7 +78,9 @@ __numonic_git_done() {
 
 	main=
 
-	for current in "${branch}" develop next main master; do
+	remote_branches=$(git ls-remote --heads "${upstream}" 2>/dev/null | cut -f 2)
+	for current in "${branch}" develop next main master ${remote_branches}; do
+		current=${current##*refs/heads/}
 		if git show-ref --quiet --verify "refs/remotes/${upstream}/${current}"; then
 			main="${current}"
 			break
@@ -100,11 +108,10 @@ __numonic_git_done() {
 	fi
 
 	(
-		if [ -n "${debug:-}" ]; then
-			set -x
+		if [ -z "${dry_run:-}" ]; then
+			git checkout --recurse-submodules "${branch}"
 		fi
 
-		git checkout --recurse-submodules "${branch}"
 		git-update
 		git-delete-merged --remote="${origin}" --branch="${branch}"
 		git-remote-prune --remote="${origin}"

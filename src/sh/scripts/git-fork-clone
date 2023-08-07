@@ -114,7 +114,7 @@ __numonic_git_fork_clone() {
 		git remote add upstream "${upstream_url}"
 
 		# remove any completed branches
-		git-fork-done --branch="${branch}" --remote=upstream
+		git-done --branch="${branch}" --remote=upstream
 	)
 }
 

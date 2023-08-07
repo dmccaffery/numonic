@@ -67,7 +67,6 @@ __numonic_theme_vscode() {
 		yes_word="${3}"
 		no_word="${4}"
 
-
 		elif [ -d "/Applications/Visual Studio Code.app" ]; then
 			code_app="/Applications/Visual Studio Code.app"
 		elif [ -d "${HOME}/Applications/Visual Studio Code.app" ]; then

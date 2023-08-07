@@ -83,7 +83,14 @@ __numonic_git_start() {
 		return 1
 	fi
 
-	for current in develop next main master; do
+	if [ -n "${debug:-}" ]; then
+		set -x
+	fi
+
+	remote_branches=$(git ls-remote --heads "${upstream}" 2>/dev/null)
+
+	for current in develop next main master ${remote_branches}; do
+		current=${current##*refs/heads}
 		if git show-ref --quiet --verify "refs/heads/${current}"; then
 			main="${current}"
 			break
@@ -112,10 +119,6 @@ __numonic_git_start() {
 	fi
 
 	(
-		if [ -n "${debug:-}" ]; then
-			set -x
-		fi
-
 		# attempt to pull from the origin
 		git pull "${origin}" || true
 

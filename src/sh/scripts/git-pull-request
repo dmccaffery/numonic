@@ -64,7 +64,14 @@ __numonic_git_pull_request() {
 		remote="upstream"
 	fi
 
-	for current in "${branch}" develop next main master; do
+	if [ -n "${debug:-}" ]; then
+		set -x
+	fi
+
+	remote_branches=$(git ls-remote --heads "${remote}" 2>/dev/null)
+
+	for current in "${branch}" develop next main master ${remote_branches}; do
+		current=${current##*refs/heads}
 		if git show-ref --quiet --verify "refs/heads/${current}"; then
 			branch="${current}"
 			break
@@ -83,10 +90,6 @@ __numonic_git_pull_request() {
 	(
 		if [ -n "${quiet:-}" ]; then
 			exec 1>/dev/null
-		fi
-
-		if [ -n "${debug:-}" ]; then
-			set -x
 		fi
 
 		# add all files recursively

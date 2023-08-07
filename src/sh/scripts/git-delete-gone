@@ -57,10 +57,10 @@ __numonic_git_delete_gone() {
 		fi
 
 		for remote in ${remotes}; do
+			git fetch --prune "${remote}"
+
 			if [ "${remote}" = "upstream" ]; then
-				git fetch --prune --prune-tags "${remote}"
-			else
-				git fetch --prune "${remote}"
+				git fetch --prune-tags --force "${remote}"
 			fi
 		done
 

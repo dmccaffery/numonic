@@ -5,7 +5,7 @@ set -e
 __numonic_git_delete_merged() {
 	branch=
 	remote=
-	exclude="develop|next|main|master"
+	exclude=
 
 	while :; do
 		case $1 in
@@ -70,9 +70,15 @@ __numonic_git_delete_merged() {
 		remote="origin"
 	fi
 
-	default=
+	if [ -n "${debug:-}" ]; then
+		set -x
+	fi
 
-	for current in "${branch}" develop next main master; do
+	default=
+	remote_branches=$(git ls-remote --heads "upstream" 2>/dev/null | cut -f 2)
+
+	for current in "${branch}" develop next main master ${remote_branches}; do
+		current=${current##*refs/heads/}
 		if git show-ref --quiet --verify "refs/heads/${current}"; then
 			if [ -z "${default:-}" ]; then
 				default="${current}"
@@ -98,10 +104,6 @@ __numonic_git_delete_merged() {
 	fi
 
 	(
-		if [ -n "${debug:-}" ]; then
-			set -x
-		fi
-
 		git branch --merged "${branch}" \
 			| grep -Ev " ${exclude}" \
 			| xargs git branch -d 2>/dev/null

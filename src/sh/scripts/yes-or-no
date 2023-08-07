@@ -8,10 +8,8 @@ __numonic_yes_or_no() {
 		return 1
 	fi
 
-	newline=$(printf '\n')
-
-	IFS=$(printf '\n') printf "${CLR_MAGENTA}%s" "$*"
-	printf "?${CLR_BRIGHT_MAGENTA} %s ${FORMAT_CLEAR}" "[Yn]:"
+	IFS=$(printf '\n') printf "${CLR_RED}%s" "$*"
+	printf "?${CLR_BRIGHT_RED} %s ${FORMAT_CLEAR}" "[Yn]:"
 
 	stty_old=$(stty -g)
 	stty raw -echo
