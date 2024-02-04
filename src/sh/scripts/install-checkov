@@ -15,6 +15,10 @@ __numonic_install_checkov() {
 				return 0
 				;;
 			-f|--force)
+				if [ -L "${NUMONIC_BIN}/checkov" ]; then
+					rm -f "${NUMONIC_BIN}/checkov"
+				fi
+
 				if [ -d "${install_dir}" ]; then
 					rm -rf "${install_dir}"
 				fi
